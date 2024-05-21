@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil</title>
+</head>
+<body>
+    <h1>Bienvenue sur notre site</h1>
+    {{if .}}
+    <p>Bienvenue, {{.Username}} ! <img src="{{.ProfilePicture}}" alt="Photo de profil" style="width:50px;height:50px;border-radius: 50px;"></p>
+    <p><a href="/user?username={{.Username}}">Votre profil</a></p>
+    {{else}}
+    <p><a href="/register">Inscription</a></p>
+    <p><a href="/login">Connexion</a></p>
+    {{end}}
+</body>
+</html>
