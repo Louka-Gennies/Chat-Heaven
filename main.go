@@ -94,7 +94,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
 
-		err := ajouterUtilisateur(username, email, password, "")
+		err := ajouterUtilisateur(username, email, password, "./static/uploads/blank-pfp.png")
 		if err != nil {
 			http.Error(w, "Erreur lors de l'inscription", http.StatusInternalServerError)
 			return
