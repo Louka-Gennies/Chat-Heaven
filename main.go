@@ -56,7 +56,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
     username, ok := session.Values["username"]
 
     if !ok {
-        // L'utilisateur n'est pas connecté, affichez simplement la page d'accueil
         tmpl, err := template.ParseFiles("templates/home.html")
         if err != nil {
             http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
