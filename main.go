@@ -100,7 +100,12 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		session, _ := store.Get(r, "session")
+		session.Values["username"] = username
+		session.Save(r, w)
+
+		http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
+
 		return
 	}
 
