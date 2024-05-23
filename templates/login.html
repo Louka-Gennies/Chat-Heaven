@@ -3,18 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion</title>
+    <title>Sign In</title>
+    <link rel="stylesheet" href="../static/css/login-register.css">
+    <link rel="stylesheet" href="../static/css/style.css">
 </head>
 <body>
-    <h1>Connexion</h1>
-    <form action="/login" method="POST">
-        <label for="username">Nom d'utilisateur :</label>
-        <input type="text" id="username" name="username" required>
-        <br>
-        <label for="password">Mot de passe :</label>
-        <input type="password" id="password" name="password" required>
-        <br>
-        <input type="submit" value="Se connecter">
-    </form>
+    <section class="left-section">
+        <h1>Welcome back to</h1>
+        <img src="../static/img/logo-placeholder.png" alt="logo-placeholder">
+        <h2>Chat Heaven</h2>
+        <p>Welcome to Chat Heaven, your go-to online community. <br>
+           Explore diverse topics in a user-friendly, moderated environment. <br>
+           Join us and let your voice be heard!
+        </p>
+        <p class="copyright">Chat Heaven ©</p>
+    </section>
+
+    <section class="right-section">
+        <h1>Login To Your Account</h1>
+        <form action="/login" method="POST">
+            <label for="username">Username :</label>
+            <input type="text" id="username" name="username" placeholder="Enter Your Username" required>
+            <br>
+            <label for="password">Password :</label>
+            <input type="password" id="password" name="password" placeholder="Enter Your Password" required>
+            <br>
+            <input type="submit" value="Sign In" class="sign-in">
+        </form>
+        <p class="register">You don't have an account ? <a href="/register">Register Now</a></p>
+    </section>
 </body>
 </html>
