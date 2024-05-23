@@ -7,6 +7,15 @@ body {
     background-size: cover;
 }
 
+.home-button {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    font-size: 30px;
+    color: #fff;
+    text-decoration: none;
+}
+
 .left-section {
     display: flex;
     flex-direction: column;
