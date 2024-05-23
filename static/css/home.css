@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+html {
+    font-family: Inter;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 10px;
+    text-align: center;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header a {
+    text-decoration: none;
+    color: black;
+}
+
+.title {
+    font-size: 35px;
+    font-weight: 500;
+}
+
+.bold {
+    font-weight: 800;
+}
+
+.search {
+    display: flex;
+    justify-content: space-between;
+    width: 50%;
+    height: 50px;
+    background-color: #E9E7E7;
+    border-radius: 20px;
+    align-content: center;
+    padding: 0 30px;
+    font-size: 25px;
+    font-weight: 500;
+    color: #857E7E;
+}
+
+.search p {
+    align-self: center;
+}
+
+.search svg {
+    align-self: center;
+}
+
+.login {
+    font-size: 20px;
+    font-weight: 500;
+    background-color: #3977F1;
+    width: 10%;
+    height: 50px;
+    border-radius: 70px;
+    text-align: center;
+    align-content: center;
+    transition: 0.5s;
+}
+
+.login:hover {
+    background-color: #2F5FCC;
+}
+
+.login a {
+    text-decoration: none;
+    color: white;
+    font-size: 24px;
+    font-weight: 400;
+}
+
+main {
+    margin-top: 3%;
+    width: 70%;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    column-gap: 50px;
+}
+
+.welcome {
+    border-radius: 20px;
+    grid-column: span 3;
+    background-color: #D9D9D9;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+}
+
+.welcome h1 {
+    font-size: 70px;
+    font-weight: 700;
+    align-self: center;
+}
+
+.topics {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 20px;
+    background-color: #1EE592;
+    height: 150px;
+}
+
+.posts {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 20px;
+    background-color: #98E9FF;
+    height: 150px;
+}
+
+.users {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 20px;
+    background-color: #BB61F3;
+    height: 150px;
+}
+
+.text h3 {
+    font-size: 28px;
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
+}
+
+.stats svg {
+    position: relative;
+    align-self: center;
+    top: -40px;
+}

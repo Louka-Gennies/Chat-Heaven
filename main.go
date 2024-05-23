@@ -20,7 +20,7 @@ var db *sql.DB
 var store = sessions.NewCookieStore([]byte("menu-classique-burger"))
 
 func main() {
-	dbPath := "utilisateurs.db"
+	dbPath := "chatHeaven.db"
 
 	var err error
 	db, err = sql.Open("sqlite", dbPath)
@@ -29,7 +29,7 @@ func main() {
 	}
 	defer db.Close()
 
-	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS utilisateurs (
+	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		username TEXT NOT NULL UNIQUE,
 		email TEXT NOT NULL UNIQUE,
@@ -66,7 +66,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     var profilePicture string
-    err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM utilisateurs WHERE username = ?", username).Scan(&profilePicture)
+    err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
     if err != nil {
         http.Error(w, "Erreur lors de la récupération de la photo de profil", http.StatusInternalServerError)
         return
@@ -147,7 +147,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		var email, profilePicture string
-		query := `SELECT email, profile_picture FROM utilisateurs WHERE username = ?`
+		query := `SELECT email, profile_picture FROM users WHERE username = ?`
 		err := db.QueryRowContext(context.Background(), query, username).Scan(&email, &profilePicture)
 		if err != nil {
 			http.Error(w, "Utilisateur non trouvé", http.StatusNotFound)
@@ -189,7 +189,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 		defer f.Close()
 		io.Copy(f, file)
 
-		updateSQL := `UPDATE utilisateurs SET profile_picture = ? WHERE username = ?`
+		updateSQL := `UPDATE users SET profile_picture = ? WHERE username = ?`
 		_, err = db.ExecContext(context.Background(), updateSQL, "/static/uploads/"+handler.Filename, username)
 		if err != nil {
 			http.Error(w, "Erreur lors de la mise à jour de la photo de profil", http.StatusInternalServerError)
@@ -213,7 +213,7 @@ func ajouterUtilisateur(username, email, motDePasse, profilePicture string) erro
 		return err
 	}
 
-	_, err = db.ExecContext(context.Background(), `INSERT INTO utilisateurs (username, email, mot_de_passe, profile_picture) VALUES (?, ?, ?, ?)`,
+	_, err = db.ExecContext(context.Background(), `INSERT INTO users (username, email, mot_de_passe, profile_picture) VALUES (?, ?, ?, ?)`,
 		username, email, hashedPassword, profilePicture)
 	if err != nil {
 		return err
@@ -223,7 +223,7 @@ func ajouterUtilisateur(username, email, motDePasse, profilePicture string) erro
 
 func verifierUtilisateur(username, motDePasse string) error {
 	var motDePasseDB string
-	err := db.QueryRowContext(context.Background(), "SELECT mot_de_passe FROM utilisateurs WHERE username = ?", username).Scan(&motDePasseDB)
+	err := db.QueryRowContext(context.Background(), "SELECT mot_de_passe FROM users WHERE username = ?", username).Scan(&motDePasseDB)
 	if err != nil {
 		return err
 	}
