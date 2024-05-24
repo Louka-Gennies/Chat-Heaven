@@ -30,11 +30,40 @@ func main() {
 	defer db.Close()
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        mot_de_passe TEXT NOT NULL,
+        profile_picture TEXT,
+        user_likes INTEGER
+    )`)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS topics (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT NOT NULL UNIQUE,
-		email TEXT NOT NULL UNIQUE,
-		mot_de_passe TEXT NOT NULL,
-		profile_picture TEXT
+		title TEXT NOT NULL UNIQUE,
+		description TEXT NOT NULL,
+		picture TEXT,
+		user_id INTEGER NOT NULL,
+		topic_likes INTEGER,
+		FOREIGN KEY (user_id) REFERENCES users(id)
+	)`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS posts (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		title TEXT NOT NULL UNIQUE,
+		content TEXT NOT NULL UNIQUE,
+		picture TEXT,
+		topic_id INTEGER NOT NULL,
+		user_id INTEGER NOT NULL,
+		post_likes INTEGER,
+		FOREIGN KEY (topic_id) REFERENCES topics(id),
+		FOREIGN KEY (user_id) REFERENCES users(id)
 	)`)
 	if err != nil {
 		log.Fatal(err)
