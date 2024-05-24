@@ -13,11 +13,11 @@ body {
 }
 
 header {
-    width: 100%;
+    width: 100vw;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 10px;
+    padding: 15px 0px;
     text-align: center;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -30,6 +30,7 @@ header a {
 .title {
     font-size: 35px;
     font-weight: 500;
+    margin-left: 2%;
 }
 
 .bold {
@@ -79,6 +80,31 @@ header a {
     color: white;
     font-size: 24px;
     font-weight: 400;
+}
+
+.pfp .profile img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+}
+
+.pfp .username {
+    text-decoration: none;
+    color: black;
+    font-size: 30px;
+    font-weight: 700;
+    font-style: italic;
+    margin-right: 10%;
+}
+
+.pfp {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.pfp {
+    margin-right: 2%;
 }
 
 main {
