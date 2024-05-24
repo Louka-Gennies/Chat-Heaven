@@ -9,6 +9,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    background-image: url(../img/home-background.svg);
+    background-size: cover;
 }
 
 header {
@@ -107,6 +109,8 @@ header a {
 }
 
 main {
+    display: flex;
+    flex-direction: column;
     margin-top: 3%;
     width: 70%;
 }
@@ -238,26 +242,20 @@ main {
     color: #007BFF;
 }
 
-
-footer {
-    position: absolute;
-    bottom: 0;
-    justify-content: center;
-    width: 100%;
-    color: #838282;
+.footer {
     display: flex;
-    align-items: flex-end;
-    height: 50%;
-    z-index: -1;
-    background-image: url("../img/home-background.svg");
-    background-size: cover;
-    background-repeat: no-repeat;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100px;
+    margin-top: 20px;
 }
 
-footer p {
+.footer p {
+    margin-top: 175px;
     font-size: 20px;
     font-weight: 500;
-    padding: 10px;
-    text-decoration: underline;
     vertical-align: bottom;
+    color: #838282;
+    bottom: 0;
 }
