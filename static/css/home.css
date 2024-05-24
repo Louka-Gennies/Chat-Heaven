@@ -159,6 +159,11 @@ main {
 .forum {
     width: 100%;
     margin-top: 20px;
+    overflow: hidden;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border : 1px solid #BEB5B5;
+
 }
 
 .forum table {
@@ -168,14 +173,28 @@ main {
 }
 
 .forum th {
-    border-radius: 20px;
-    background-color: #f8f8f8;
-    color: #333;
-    font-weight: bold;
-    padding: 10px;
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: 550;
+    padding: 20px;
     text-align: left;
-    border : 2px solid #f0f0f0;
+    font-size: 24px;
+
 }
+
+.tab-forum {
+    border-collapse: collapse;
+    width: 50%;
+}
+
+.nb-posts {
+    width: 10%;
+}
+
+.last-post {
+    width: 40%;
+}
+
 
 .forum td {
     padding: 10px;
