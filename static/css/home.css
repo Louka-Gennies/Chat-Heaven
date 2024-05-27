@@ -194,13 +194,18 @@ main {
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     border : 1px solid #BEB5B5;
+    background-color: #ffffff;
 
+}
+
+.forum tbody {
+    background-color: #ffffff;
 }
 
 .forum table {
     width: 100%;
     border-collapse: collapse;
-
+    background-color: #ffffff;
 }
 
 .forum th {

@@ -5,7 +5,9 @@
 </head>
 <body>
 <h1>Write a Post</h1>
+{{.Topic}}
 <form action="/create-post" method="post">
+    <input type="hidden" id="topic" name="topic" value="{{.Topic}}">
     <label for="title">Title:</label><br>
     <input type="text" id="title" name="title"><br>
     <label for="content">Content:</label><br>

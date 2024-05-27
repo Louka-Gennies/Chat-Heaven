@@ -19,6 +19,19 @@ import (
 var db *sql.DB
 var store = sessions.NewCookieStore([]byte("menu-classique-burger"))
 
+type Topic struct {
+	Title       string
+	Description string
+	NbPosts	 int
+}
+
+type Post struct {
+	Title   string
+	Content string
+	User   string
+	Topic  string
+}
+
 func main() {
 	dbPath := "chatHeaven.db"
 
@@ -60,8 +73,10 @@ func main() {
 		content TEXT NOT NULL UNIQUE,
 		picture TEXT,
 		user TEXT NOT NULL,
+		topic TEXT NOT NULL,
 		post_likes INTEGER,
 		FOREIGN KEY (user) REFERENCES users(username)
+		FOREIGN KEY (topic) REFERENCES topics(title)
 	)`)
 	if err != nil {
 		log.Fatal(err)
@@ -106,9 +121,18 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Username       string
 		ProfilePicture string
+		NbPosts        int
+		NbTopics       int
+		NbUsers        int
+		Last4Topics    []Topic
+
 	}{
 		Username:       username.(string),
 		ProfilePicture: profilePicture,
+		NbPosts:        countPosts(),
+		NbTopics:       countTopics(),
+		NbUsers:        countUsers(),
+		Last4Topics:    getTopics(4),
 	}
 
 	tmpl, err := template.ParseFiles("templates/home.html")
@@ -267,12 +291,13 @@ func verifierUtilisateur(username, motDePasse string) error {
 }
 
 func postsHandler(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.QueryContext(context.Background(), "SELECT title, content FROM posts")
-	if err != nil {
-		http.Error(w, "Erreur lors de la récupération des messages", http.StatusInternalServerError)
-		return
+	topic := r.URL.Query().Get("topic")
+	fmt.Println(topic)
+	Posts := getPosts(topic)
+
+	for _, post := range Posts {
+		fmt.Println(post.Title, post.Content)
 	}
-	defer rows.Close()
 
 	tmpl, err := template.ParseFiles("templates/post.html")
 	if err != nil {
@@ -280,24 +305,11 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type Post struct {
-		Title   string
-		Content string
-	}
-
-	var Posts []Post
-	for rows.Next() {
-		var post Post
-		if err := rows.Scan(&post.Title, &post.Content); err != nil {
-			http.Error(w, "Erreur lors de la lecture des messages", http.StatusInternalServerError)
-			return
-		}
-		Posts = append(Posts, post)
-	}
-
 	data := struct {
+		Topic string
 		Post []Post
 	}{
+		Topic: topic,
 		Post: Posts,
 	}
 
@@ -305,36 +317,47 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(post.Title, post.Content)
 	}
 
+
 	tmpl.Execute(w, data)
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("templates/create-post.html")
+	if err != nil {
+		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		return
+	}
+
+	topic := r.URL.Query().Get("topic")
+
+	data := struct {
+		Topic string
+	}{
+		Topic: topic,
+	}
+
 	if r.Method == "POST" {
-		fmt.Println("PostHandler")
 		session, _ := store.Get(r, "session")
-		fmt.Println(session.Values)
 		username, ok := session.Values["username"]
-		fmt.Println(username)
-		title, content := r.FormValue("title"), r.FormValue("content")
-		fmt.Println(title, content)
+		title, content, topicTitle := r.FormValue("title"), r.FormValue("content"), r.FormValue("topic")
+
 		if !ok {
 			http.Error(w, "Vous devez être connecté pour poster un message", http.StatusUnauthorized)
 			return
 		}
-		fmt.Println(title, content)
-		if r.Method == "POST" {
-			_, err := db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content) VALUES (?, ?, ?)", username, title, content)
-			if err != nil {
-				fmt.Println(err)
-				http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
-				return
-			}
+		_, err := db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic) VALUES (?, ?, ?, ?)", username, title, content, topicTitle)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
+			return
 		}
 		fmt.Println("Post ajouté avec succès !")
 		http.Redirect(w, r, "/post", http.StatusSeeOther)
 
 	}
-	http.ServeFile(w, r, "templates/create-post.html")
+
+	
+	tmpl.Execute(w, data)
 }
 
 
@@ -352,11 +375,6 @@ func topicsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type Topic struct {
-		Title       string
-		Description string
-	}
-
 	var Topics []Topic
 	for rows.Next() {
 		var topic Topic
@@ -371,6 +389,10 @@ func topicsHandler(w http.ResponseWriter, r *http.Request) {
 		Topic []Topic
 	}{
 		Topic: Topics,
+	}
+
+	for _, topic := range Topics {
+		fmt.Println(topic.Title, topic.Description, topic.NbPosts)
 	}
 
 	tmpl.Execute(w, data)
@@ -403,4 +425,102 @@ func createTopic(w http.ResponseWriter, r *http.Request) {
 
 	}
 	http.ServeFile(w, r, "templates/create-topic.html")
+}
+
+func countPosts() int {
+	var count int
+	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM posts").Scan(&count)
+	if err != nil {
+		return 0
+	}
+	return count
+}
+
+func countTopics() int {
+	var count int
+	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM topics").Scan(&count)
+	if err != nil {
+		return 0
+	}
+	return count
+}
+
+func countUsers() int {
+	var count int
+	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM users").Scan(&count)
+	if err != nil {
+		return 0
+	}
+	return count
+}
+
+func getTopics(nbOfTopics int) []Topic {
+	totalTopics := countTopics()
+	if nbOfTopics > totalTopics {
+		nbOfTopics = totalTopics
+	}
+	if nbOfTopics > 0 {
+		rows, err := db.QueryContext(context.Background(), "SELECT title, Description FROM topics")
+		if err != nil {
+			return nil
+		}
+		defer rows.Close()
+
+		topics := make([]Topic, 0, nbOfTopics)
+		for rows.Next() {
+			var topic Topic
+			if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
+				return nil
+			}
+			topics = append(topics, topic)
+		}
+		return topics
+	} else {
+		rows, err := db.QueryContext(context.Background(), "SELECT title, description FROM topics")
+		if err != nil {
+			return nil
+		}
+		defer rows.Close()
+
+		var topics []Topic
+		for rows.Next() {
+			var topic Topic
+			if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
+				return nil
+			}
+			topics = append(topics, topic)
+		}
+		return topics
+	}
+}
+
+func getPosts(topicTitle string, nbOfPosts ...int) []Post {
+    var rows *sql.Rows
+    var err error
+
+    if len(nbOfPosts) > 0 && nbOfPosts[0] > 0 {
+        totalPosts := countPosts()
+        if nbOfPosts[0] > totalPosts {
+            nbOfPosts[0] = totalPosts
+        }
+
+        rows, err = db.QueryContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE topic = ? LIMIT ?", topicTitle, nbOfPosts[0])
+    } else {
+        rows, err = db.QueryContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE topic = ?", topicTitle)
+    }
+
+    if err != nil {
+        return nil
+    }
+    defer rows.Close()
+
+    var posts []Post
+    for rows.Next() {
+        var post Post
+        if err := rows.Scan(&post.Title, &post.Content, &post.User, &post.Topic); err != nil {
+            return nil
+        }
+        posts = append(posts, post)
+    }
+    return posts
 }
