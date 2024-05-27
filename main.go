@@ -74,6 +74,8 @@ func main() {
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/create-post", createPost)
 	http.HandleFunc("/post", postPageHandler)
+	http.HandleFunc("/topics", topicsHandler)
+	http.HandleFunc("/create-topic", createTopic)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("Server started at :8080")
@@ -273,28 +275,28 @@ func postPageHandler(w http.ResponseWriter, r *http.Request) {
 
 func createPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-	fmt.Println("PostHandler")
-	session, _ := store.Get(r, "session")
-	fmt.Println(session.Values)
-	username, ok := session.Values["username"]
-	fmt.Println(username)
-	title, content := r.FormValue("title"), r.FormValue("content")
-	fmt.Println(title, content)
-	if !ok {
-		http.Error(w, "Vous devez être connecté pour poster un message", http.StatusUnauthorized)
-		return
-	}
-	fmt.Println(title, content)
-	if r.Method == "POST"{
-		_, err := db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content) VALUES (?, ?, ?)", username, title, content)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
+		fmt.Println("PostHandler")
+		session, _ := store.Get(r, "session")
+		fmt.Println(session.Values)
+		username, ok := session.Values["username"]
+		fmt.Println(username)
+		title, content := r.FormValue("title"), r.FormValue("content")
+		fmt.Println(title, content)
+		if !ok {
+			http.Error(w, "Vous devez être connecté pour poster un message", http.StatusUnauthorized)
 			return
 		}
-	}
-	fmt.Println("Post ajouté avec succès !")
-	http.Redirect(w, r, "/post", http.StatusSeeOther)
+		fmt.Println(title, content)
+		if r.Method == "POST" {
+			_, err := db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content) VALUES (?, ?, ?)", username, title, content)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
+				return
+			}
+		}
+		fmt.Println("Post ajouté avec succès !")
+		http.Redirect(w, r, "/post", http.StatusSeeOther)
 
 	}
 	http.ServeFile(w, r, "templates/create-post.html")
@@ -333,4 +335,71 @@ func verifierUtilisateur(username, motDePasse string) error {
 		return fmt.Errorf("mot de passe incorrect")
 	}
 	return nil
+}
+
+func topicsHandler(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.QueryContext(context.Background(), "SELECT title, description FROM topics")
+	if err != nil {
+		http.Error(w, "Erreur lors de la récupération des messages", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	tmpl, err := template.ParseFiles("templates/topic.html")
+	if err != nil {
+		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		return
+	}
+
+	type Topic struct {
+		Title       string
+		Description string
+	}
+
+	var Topics []Topic
+	for rows.Next() {
+		var topic Topic
+		if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
+			http.Error(w, "Erreur lors de la lecture des messages", http.StatusInternalServerError)
+			return
+		}
+		Topics = append(Topics, topic)
+	}
+
+	data := struct {
+		Topic []Topic
+	}{
+		Topic: Topics,
+	}
+
+	tmpl.Execute(w, data)
+}
+
+func createTopic(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+
+		session, _ := store.Get(r, "session")
+
+		username, ok := session.Values["username"]
+
+		title, description := r.FormValue("title"), r.FormValue("description")
+
+		if !ok {
+			http.Error(w, "Vous devez être connecté pour poster un message", http.StatusUnauthorized)
+			return
+		}
+
+		if r.Method == "POST" {
+			_, err := db.ExecContext(context.Background(), "INSERT INTO topics (user, title, description) VALUES (?, ?, ?)", username, title, description)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
+				return
+			}
+		}
+		fmt.Println("topic ajouté avec succès !")
+		http.Redirect(w, r, "/topics", http.StatusSeeOther)
+
+	}
+	http.ServeFile(w, r, "templates/create-topic.html")
 }

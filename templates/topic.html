@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Post Submission</title>
+</head>
+<body>
+<h2>Topics</h2>
+{{range .Topic}}
+    <h3>{{.Title}}</h3>
+    <p>{{.Description}}</p>
+{{end}}
+<a href="/create-topic">Create a topic</a>
+</body>
+</html>
