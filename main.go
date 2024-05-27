@@ -46,9 +46,9 @@ func main() {
 		title TEXT NOT NULL UNIQUE,
 		description TEXT NOT NULL,
 		picture TEXT,
-		user_id INTEGER NOT NULL,
+		user TEXT NOT NULL,
 		topic_likes INTEGER,
-		FOREIGN KEY (user_id) REFERENCES users(id)
+		FOREIGN KEY (user) REFERENCES users(username)
 	)`)
 	if err != nil {
 		log.Fatal(err)
@@ -59,11 +59,9 @@ func main() {
 		title TEXT NOT NULL UNIQUE,
 		content TEXT NOT NULL UNIQUE,
 		picture TEXT,
-		topic_id INTEGER NOT NULL,
-		user_id INTEGER NOT NULL,
+		user TEXT NOT NULL,
 		post_likes INTEGER,
-		FOREIGN KEY (topic_id) REFERENCES topics(id),
-		FOREIGN KEY (user_id) REFERENCES users(id)
+		FOREIGN KEY (user) REFERENCES users(username)
 	)`)
 	if err != nil {
 		log.Fatal(err)
@@ -74,7 +72,7 @@ func main() {
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/user", userHandler)
 	http.HandleFunc("/logout", logoutHandler)
-	http.HandleFunc("/submit-post", postHandler)
+	http.HandleFunc("/create-post", createPost)
 	http.HandleFunc("/post", postPageHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
@@ -169,26 +167,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func postHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session")
-	username, ok := session.Values["username"]
-	title, content := r.FormValue("title"), r.FormValue("content")
-	if !ok {
-		http.Error(w, "Vous devez être connecté pour poster un message", http.StatusUnauthorized)
-		return
-	}
-
-	if r.Method == "POST" {
-		_, err := db.ExecContext(context.Background(), "INSERT INTO posts (username, title, content) VALUES (?, ?, ?)", username, title, content)
-		if err != nil {
-			http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
-			return
-		}
-	}
-	http.Redirect(w, r, "/post", http.StatusSeeOther)
-
-}
-
 func userHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.URL.Query().Get("username")
 	if username == "" {
@@ -258,6 +236,13 @@ func postPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer rows.Close()
+
+	tmpl, err := template.ParseFiles("templates/post.html")
+	if err != nil {
+		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		return
+	}
+
 	type Post struct {
 		Title   string
 		Content string
@@ -272,14 +257,47 @@ func postPageHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		Posts = append(Posts, post)
 	}
-	fmt.Println("%v", Posts)
 
-	tmpl, err := template.ParseFiles("templates/post.html")
-	if err != nil {
-		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+	data := struct {
+		Post []Post
+	}{
+		Post: Posts,
+	}
+
+	for _, post := range Posts {
+		fmt.Println(post.Title, post.Content)
+	}
+
+	tmpl.Execute(w, data)
+}
+
+func createPost(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+	fmt.Println("PostHandler")
+	session, _ := store.Get(r, "session")
+	fmt.Println(session.Values)
+	username, ok := session.Values["username"]
+	fmt.Println(username)
+	title, content := r.FormValue("title"), r.FormValue("content")
+	fmt.Println(title, content)
+	if !ok {
+		http.Error(w, "Vous devez être connecté pour poster un message", http.StatusUnauthorized)
 		return
 	}
-	tmpl.Execute(w, Posts)
+	fmt.Println(title, content)
+	if r.Method == "POST"{
+		_, err := db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content) VALUES (?, ?, ?)", username, title, content)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
+			return
+		}
+	}
+	fmt.Println("Post ajouté avec succès !")
+	http.Redirect(w, r, "/post", http.StatusSeeOther)
+
+	}
+	http.ServeFile(w, r, "templates/create-post.html")
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
