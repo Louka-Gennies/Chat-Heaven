@@ -30,11 +30,40 @@ func main() {
 	defer db.Close()
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        mot_de_passe TEXT NOT NULL,
+        profile_picture TEXT,
+        user_likes INTEGER
+    )`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS topics (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT NOT NULL UNIQUE,
-		email TEXT NOT NULL UNIQUE,
-		mot_de_passe TEXT NOT NULL,
-		profile_picture TEXT
+		title TEXT NOT NULL UNIQUE,
+		description TEXT NOT NULL,
+		picture TEXT,
+		user_id INTEGER NOT NULL,
+		topic_likes INTEGER,
+		FOREIGN KEY (user_id) REFERENCES users(id)
+	)`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS posts (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		title TEXT NOT NULL UNIQUE,
+		content TEXT NOT NULL UNIQUE,
+		picture TEXT,
+		topic_id INTEGER NOT NULL,
+		user_id INTEGER NOT NULL,
+		post_likes INTEGER,
+		FOREIGN KEY (topic_id) REFERENCES topics(id),
+		FOREIGN KEY (user_id) REFERENCES users(id)
 	)`)
 	if err != nil {
 		log.Fatal(err)
@@ -45,6 +74,8 @@ func main() {
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/user", userHandler)
 	http.HandleFunc("/logout", logoutHandler)
+	http.HandleFunc("/submit-post", postHandler)
+	http.HandleFunc("/post", postPageHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("Server started at :8080")
@@ -52,40 +83,40 @@ func main() {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-    session, _ := store.Get(r, "session")
-    username, ok := session.Values["username"]
+	session, _ := store.Get(r, "session")
+	username, ok := session.Values["username"]
 
-    if !ok {
-        tmpl, err := template.ParseFiles("templates/home.html")
-        if err != nil {
-            http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
-            return
-        }
-        tmpl.Execute(w, nil)
-        return
-    }
+	if !ok {
+		tmpl, err := template.ParseFiles("templates/home.html")
+		if err != nil {
+			http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, nil)
+		return
+	}
 
-    var profilePicture string
-    err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
-    if err != nil {
-        http.Error(w, "Erreur lors de la récupération de la photo de profil", http.StatusInternalServerError)
-        return
-    }
+	var profilePicture string
+	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+	if err != nil {
+		http.Error(w, "Erreur lors de la récupération de la photo de profil", http.StatusInternalServerError)
+		return
+	}
 
-    data := struct {
-        Username       string
-        ProfilePicture string
-    }{
-        Username:       username.(string),
-        ProfilePicture: profilePicture,
-    }
+	data := struct {
+		Username       string
+		ProfilePicture string
+	}{
+		Username:       username.(string),
+		ProfilePicture: profilePicture,
+	}
 
-    tmpl, err := template.ParseFiles("templates/home.html")
-    if err != nil {
-        http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
-        return
-    }
-    tmpl.Execute(w, data)
+	tmpl, err := template.ParseFiles("templates/home.html")
+	if err != nil {
+		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, data)
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
@@ -136,6 +167,26 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
 	}
+}
+
+func postHandler(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session")
+	username, ok := session.Values["username"]
+	title, content := r.FormValue("title"), r.FormValue("content")
+	if !ok {
+		http.Error(w, "Vous devez être connecté pour poster un message", http.StatusUnauthorized)
+		return
+	}
+
+	if r.Method == "POST" {
+		_, err := db.ExecContext(context.Background(), "INSERT INTO posts (username, title, content) VALUES (?, ?, ?)", username, title, content)
+		if err != nil {
+			http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
+			return
+		}
+	}
+	http.Redirect(w, r, "/post", http.StatusSeeOther)
+
 }
 
 func userHandler(w http.ResponseWriter, r *http.Request) {
@@ -198,6 +249,37 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
 	}
+}
+
+func postPageHandler(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.QueryContext(context.Background(), "SELECT title, content FROM posts")
+	if err != nil {
+		http.Error(w, "Erreur lors de la récupération des messages", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+	type Post struct {
+		Title   string
+		Content string
+	}
+
+	var Posts []Post
+	for rows.Next() {
+		var post Post
+		if err := rows.Scan(&post.Title, &post.Content); err != nil {
+			http.Error(w, "Erreur lors de la lecture des messages", http.StatusInternalServerError)
+			return
+		}
+		Posts = append(Posts, post)
+	}
+	fmt.Println("%v", Posts)
+
+	tmpl, err := template.ParseFiles("templates/post.html")
+	if err != nil {
+		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, Posts)
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
