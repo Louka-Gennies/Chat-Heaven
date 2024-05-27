@@ -73,7 +73,7 @@ func main() {
 	http.HandleFunc("/user", userHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/create-post", createPost)
-	http.HandleFunc("/post", postPageHandler)
+	http.HandleFunc("/posts", postsHandler)
 	http.HandleFunc("/topics", topicsHandler)
 	http.HandleFunc("/create-topic", createTopic)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -231,7 +231,42 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func postPageHandler(w http.ResponseWriter, r *http.Request) {
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session")
+	session.Options.MaxAge = -1
+	session.Save(r, w)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func ajouterUtilisateur(username, email, motDePasse, profilePicture string) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(motDePasse), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.ExecContext(context.Background(), `INSERT INTO users (username, email, mot_de_passe, profile_picture) VALUES (?, ?, ?, ?)`,
+		username, email, hashedPassword, profilePicture)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func verifierUtilisateur(username, motDePasse string) error {
+	var motDePasseDB string
+	err := db.QueryRowContext(context.Background(), "SELECT mot_de_passe FROM users WHERE username = ?", username).Scan(&motDePasseDB)
+	if err != nil {
+		return err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(motDePasseDB), []byte(motDePasse))
+	if err != nil {
+		return fmt.Errorf("mot de passe incorrect")
+	}
+	return nil
+}
+
+func postsHandler(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.QueryContext(context.Background(), "SELECT title, content FROM posts")
 	if err != nil {
 		http.Error(w, "Erreur lors de la récupération des messages", http.StatusInternalServerError)
@@ -302,40 +337,6 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "templates/create-post.html")
 }
 
-func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session")
-	session.Options.MaxAge = -1
-	session.Save(r, w)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
-func ajouterUtilisateur(username, email, motDePasse, profilePicture string) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(motDePasse), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-
-	_, err = db.ExecContext(context.Background(), `INSERT INTO users (username, email, mot_de_passe, profile_picture) VALUES (?, ?, ?, ?)`,
-		username, email, hashedPassword, profilePicture)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func verifierUtilisateur(username, motDePasse string) error {
-	var motDePasseDB string
-	err := db.QueryRowContext(context.Background(), "SELECT mot_de_passe FROM users WHERE username = ?", username).Scan(&motDePasseDB)
-	if err != nil {
-		return err
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(motDePasseDB), []byte(motDePasse))
-	if err != nil {
-		return fmt.Errorf("mot de passe incorrect")
-	}
-	return nil
-}
 
 func topicsHandler(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.QueryContext(context.Background(), "SELECT title, description FROM topics")
