@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="">
 <head>
     <title>Post Submission</title>
 </head>
 <body>
 <h2>Posts</h2>
 {{range .Post}}
-    <h3>{{.Title}}</h3>
+    <a href="/post-content?postID={{.ID}}">{{.Title}}</a>
     <p>{{.Content}}</p>
+    <p>Likes : {{.Likes}}</p>
 {{end}}
 <a href="/create-post?topic={{.Topic}}">Create a Post</a>
 <a href="/">Home</a>

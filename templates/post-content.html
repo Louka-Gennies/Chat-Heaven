@@ -2,9 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>$Title$</title>
+  <title>{{.Post.Title}}</title>
 </head>
 <body>
-$END$
+<h1>{{.Post.Title}}</h1>
+<p>{{.Post.Content}}</p>
+<p>Likes : {{.Post.Likes}}</p>
+<form action="/like-post?postID={{.Post.ID}}" method="post">
+  <input type="submit" value="Like">
+</form>
+
+<h2>Commentaires</h2>
+{{range .Comment}}
+<div>
+  <p>{{.Content}}</p>
+  <p>Posté par {{.User}}</p>
+</div>
+{{end}}
+
+<h2>Ajouter un commentaire</h2>
+<form action="/post-content?postID={{.Post.ID}}" method="post">
+  <label for="content">Contenu du commentaire:</label><br>
+  <textarea id="content" name="content" rows="4" cols="50"></textarea><br>
+  <input type="submit" value="Ajouter un commentaire">
+</form>
+
+<a href="/posts?topic={{.Post.Topic}}">Retour aux posts</a>
 </body>
 </html>

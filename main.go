@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
@@ -26,10 +27,17 @@ type Topic struct {
 }
 
 type Post struct {
+	ID      int
 	Title   string
 	Content string
 	User    string
 	Topic   string
+	Likes   int
+}
+
+type Comment struct {
+	Content string
+	User    string
 }
 
 func main() {
@@ -78,14 +86,22 @@ func main() {
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS posts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title TEXT NOT NULL UNIQUE,
-		content TEXT NOT NULL UNIQUE,
+		content TEXT NOT NULL,
 		picture TEXT,
 		user TEXT NOT NULL,
 		topic TEXT NOT NULL,
-		post_likes INTEGER,
 		FOREIGN KEY (user) REFERENCES users(username)
 		FOREIGN KEY (topic) REFERENCES topics(title)
 	)`)
+
+	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS comments (
+    		id INTEGER PRIMARY KEY AUTOINCREMENT,
+    		content TEXT NOT NULL,
+    		user TEXT NOT NULL,
+    		post TEXT NOT NULL,
+    		FOREIGN KEY (user) REFERENCES users(username),
+    		FOREIGN KEY (post) REFERENCES posts(title)
+    	)`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -99,6 +115,8 @@ func main() {
 	http.HandleFunc("/posts", postsHandler)
 	http.HandleFunc("/topics", topicsHandler)
 	http.HandleFunc("/create-topic", createTopic)
+	http.HandleFunc("/post-content", getPostContent)
+	http.HandleFunc("/like-post", addLike)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("Server started at :8080")
@@ -299,12 +317,7 @@ func verifierUtilisateur(username, motDePasse string) error {
 
 func postsHandler(w http.ResponseWriter, r *http.Request) {
 	topic := r.URL.Query().Get("topic")
-	fmt.Println(topic)
 	Posts := getPosts(topic)
-
-	for _, post := range Posts {
-		fmt.Println(post.Title, post.Content)
-	}
 
 	tmpl, err := template.ParseFiles("templates/post.html")
 	if err != nil {
@@ -318,10 +331,6 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		Topic: topic,
 		Post:  Posts,
-	}
-
-	for _, post := range Posts {
-		fmt.Println(post.Title, post.Content)
 	}
 
 	tmpl.Execute(w, data)
@@ -358,7 +367,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Println("Post ajouté avec succès !")
-		http.Redirect(w, r, "/post", http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/posts?topic=%s", topic), http.StatusSeeOther)
 
 	}
 
@@ -393,10 +402,6 @@ func topicsHandler(w http.ResponseWriter, r *http.Request) {
 		Topic []Topic
 	}{
 		Topic: Topics,
-	}
-
-	for _, topic := range Topics {
-		fmt.Println(topic.Title, topic.Description, topic.NbPosts)
 	}
 
 	tmpl.Execute(w, data)
@@ -492,6 +497,7 @@ func getTopics(nbOfTopics int) []Topic {
 			if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
 				return nil
 			}
+
 			topics = append(topics, topic)
 		}
 		return topics
@@ -508,9 +514,9 @@ func getPosts(topicTitle string, nbOfPosts ...int) []Post {
 			nbOfPosts[0] = totalPosts
 		}
 
-		rows, err = db.QueryContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE topic = ? LIMIT ?", topicTitle, nbOfPosts[0])
+		rows, err = db.QueryContext(context.Background(), "SELECT id,title, content, user, topic FROM posts WHERE topic = ? LIMIT ?", topicTitle, nbOfPosts[0])
 	} else {
-		rows, err = db.QueryContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE topic = ?", topicTitle)
+		rows, err = db.QueryContext(context.Background(), "SELECT id,title, content, user, topic FROM posts WHERE topic = ?", topicTitle)
 	}
 
 	if err != nil {
@@ -521,10 +527,143 @@ func getPosts(topicTitle string, nbOfPosts ...int) []Post {
 	var posts []Post
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.Title, &post.Content, &post.User, &post.Topic); err != nil {
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.User, &post.Topic); err != nil {
 			return nil
 		}
+		post.Likes = likeCount(post.ID)
 		posts = append(posts, post)
 	}
 	return posts
+}
+
+func getComment(title string) []Comment {
+	rows, err := db.QueryContext(context.Background(), "SELECT content, user FROM comments WHERE post = ?", title)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	var comments []Comment
+	for rows.Next() {
+		var comment Comment
+		if err := rows.Scan(&comment.Content, &comment.User); err != nil {
+			return nil
+		}
+		comments = append(comments, comment)
+	}
+	return comments
+}
+
+func likeCount(postID int) int {
+	var count int
+	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE title = ?", postID).Scan(&count)
+	if err != nil {
+		return 0
+	}
+	return count
+
+}
+
+func getPostContent(w http.ResponseWriter, r *http.Request) {
+	postID := r.URL.Query().Get("postID")
+	postIDInt, err := strconv.Atoi(postID)
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+	}
+	if postID == "" {
+		http.Error(w, "Message non spécifié", http.StatusBadRequest)
+		return
+	}
+
+	var title, content, user, topic string
+	err = db.QueryRowContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE id = ?", postIDInt).Scan(&title, &content, &user, &topic)
+	if err != nil {
+		http.Error(w, "Message non trouvé", http.StatusNotFound)
+		return
+	}
+
+	if r.Method == "POST" {
+		session, _ := store.Get(r, "session")
+		username, ok := session.Values["username"]
+		comment := r.FormValue("content")
+		if !ok {
+			http.Error(w, "Vous devez être connecté pour commenter un message", http.StatusUnauthorized)
+			return
+		}
+		_, err := db.ExecContext(context.Background(), "INSERT INTO comments (user, content, post) VALUES (?, ?, ?)", username, comment, title)
+		if err != nil {
+			http.Error(w, "Erreur lors de la publication du commentaire", http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(w, r, fmt.Sprintf("/post-content?postID=%d", postIDInt), http.StatusSeeOther)
+
+	}
+
+	data := struct {
+		Post    Post
+		Comment []Comment
+	}{
+		Post: Post{
+			ID:      postIDInt,
+			Title:   title,
+			Content: content,
+			User:    user,
+			Topic:   topic,
+			Likes:   likeCount(postIDInt),
+		},
+		Comment: getComment(title),
+	}
+
+	tmpl, err := template.ParseFiles("templates/post-content.html")
+	if err != nil {
+		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, data)
+}
+
+func addLike(w http.ResponseWriter, r *http.Request) {
+	postID := r.URL.Query().Get("postID")
+	postIDInt, err := strconv.Atoi(postID)
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+	}
+	if postID == "" {
+		http.Error(w, "Message non spécifié", http.StatusBadRequest)
+		return
+	}
+
+	session, _ := store.Get(r, "session")
+	username, ok := session.Values["username"]
+	if !ok {
+		http.Error(w, "Vous devez être connecté pour aimer un message", http.StatusUnauthorized)
+		return
+	}
+
+	var existingLike int
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
+	if err != nil {
+		http.Error(w, "Erreur lors de la vérification des likes", http.StatusInternalServerError)
+		return
+	}
+
+	if existingLike > 0 {
+		// If a like exists, delete it
+		_, err = db.ExecContext(context.Background(), "DELETE FROM likes WHERE user = ? AND title = ?", username, postIDInt)
+		if err != nil {
+			http.Error(w, "Erreur lors de la suppression du like", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		// If no like exists, add a new one
+		_, err = db.ExecContext(context.Background(), "INSERT INTO likes (user, title) VALUES (?, ?)", username, postIDInt)
+		if err != nil {
+			http.Error(w, "Erreur lors de l'ajout du like", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/post-content?postID=%d", postIDInt), http.StatusSeeOther)
 }
