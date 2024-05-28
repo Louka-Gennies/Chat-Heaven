@@ -22,14 +22,14 @@ var store = sessions.NewCookieStore([]byte("menu-classique-burger"))
 type Topic struct {
 	Title       string
 	Description string
-	NbPosts	 int
+	NbPosts     int
 }
 
 type Post struct {
 	Title   string
 	Content string
-	User   string
-	Topic  string
+	User    string
+	Topic   string
 }
 
 func main() {
@@ -62,6 +62,14 @@ func main() {
 		user TEXT NOT NULL,
 		topic_likes INTEGER,
 		FOREIGN KEY (user) REFERENCES users(username)
+	)`)
+
+	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS likes (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user TEXT NOT NULL,
+		title TEXT NOT NULL,
+		FOREIGN KEY (user) REFERENCES users(username),
+		FOREIGN KEY (title) REFERENCES posts(title)
 	)`)
 	if err != nil {
 		log.Fatal(err)
@@ -125,7 +133,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		NbTopics       int
 		NbUsers        int
 		Last4Topics    []Topic
-
 	}{
 		Username:       username.(string),
 		ProfilePicture: profilePicture,
@@ -307,16 +314,15 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
 		Topic string
-		Post []Post
+		Post  []Post
 	}{
 		Topic: topic,
-		Post: Posts,
+		Post:  Posts,
 	}
 
 	for _, post := range Posts {
 		fmt.Println(post.Title, post.Content)
 	}
-
 
 	tmpl.Execute(w, data)
 }
@@ -356,10 +362,8 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	
 	tmpl.Execute(w, data)
 }
-
 
 func topicsHandler(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.QueryContext(context.Background(), "SELECT title, description FROM topics")
@@ -495,32 +499,32 @@ func getTopics(nbOfTopics int) []Topic {
 }
 
 func getPosts(topicTitle string, nbOfPosts ...int) []Post {
-    var rows *sql.Rows
-    var err error
+	var rows *sql.Rows
+	var err error
 
-    if len(nbOfPosts) > 0 && nbOfPosts[0] > 0 {
-        totalPosts := countPosts()
-        if nbOfPosts[0] > totalPosts {
-            nbOfPosts[0] = totalPosts
-        }
+	if len(nbOfPosts) > 0 && nbOfPosts[0] > 0 {
+		totalPosts := countPosts()
+		if nbOfPosts[0] > totalPosts {
+			nbOfPosts[0] = totalPosts
+		}
 
-        rows, err = db.QueryContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE topic = ? LIMIT ?", topicTitle, nbOfPosts[0])
-    } else {
-        rows, err = db.QueryContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE topic = ?", topicTitle)
-    }
+		rows, err = db.QueryContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE topic = ? LIMIT ?", topicTitle, nbOfPosts[0])
+	} else {
+		rows, err = db.QueryContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE topic = ?", topicTitle)
+	}
 
-    if err != nil {
-        return nil
-    }
-    defer rows.Close()
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
 
-    var posts []Post
-    for rows.Next() {
-        var post Post
-        if err := rows.Scan(&post.Title, &post.Content, &post.User, &post.Topic); err != nil {
-            return nil
-        }
-        posts = append(posts, post)
-    }
-    return posts
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		if err := rows.Scan(&post.Title, &post.Content, &post.User, &post.Topic); err != nil {
+			return nil
+		}
+		posts = append(posts, post)
+	}
+	return posts
 }
