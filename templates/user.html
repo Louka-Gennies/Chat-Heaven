@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Utilisateur</title>
+</head>
+<body>
+    <h1>Profil de {{.Username}}</h1>
+    <p>Email: {{.Email}}</p>
+    {{if .ProfilePicture}}
+        <img src="{{.ProfilePicture}}" alt="Photo de profil" style="width:150px;height:150px;">
+    {{end}}
+    <form action="/user?username={{.Username}}" method="POST" enctype="multipart/form-data">
+        <label for="profile_picture">Changer la photo de profil :</label>
+        <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+        <br>
+        <input type="submit" value="Télécharger">
+    </form>
+    <br>
+    <a href="/">Retour à l'accueil</a>
+    <br>
+    <form action="/logout" method="POST" style="display: inline;">
+        <input type="submit" value="Se déconnecter">
+    </form>
+</body>
+</html>
