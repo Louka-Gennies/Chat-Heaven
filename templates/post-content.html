@@ -11,6 +11,10 @@
 <form action="/like-post?postID={{.Post.ID}}" method="post">
   <input type="submit" value="Like">
 </form>
+<p>Dislikes : {{.Post.Dislikes}}</p>
+<form action="/dislike-post?postID={{.Post.ID}}" method="post">
+  <input type="submit" value="Dislike">
+</form>
 
 <h2>Commentaires</h2>
 {{range .Comment}}
