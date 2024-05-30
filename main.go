@@ -27,12 +27,13 @@ type Topic struct {
 }
 
 type Post struct {
-	ID      int
-	Title   string
-	Content string
-	User    string
-	Topic   string
-	Likes   int
+	ID       int
+	Title    string
+	Content  string
+	User     string
+	Topic    string
+	Likes    int
+	Dislikes int
 }
 
 type Comment struct {
@@ -79,9 +80,14 @@ func main() {
 		FOREIGN KEY (user) REFERENCES users(username),
 		FOREIGN KEY (title) REFERENCES posts(title)
 	)`)
-	if err != nil {
-		log.Fatal(err)
-	}
+
+	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS dislikes (
+    		id INTEGER PRIMARY KEY AUTOINCREMENT,
+    		user TEXT NOT NULL,
+    		title TEXT NOT NULL,
+    		FOREIGN KEY (user) REFERENCES users(username),
+    		FOREIGN KEY (title) REFERENCES posts(title)
+    	)`)
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS posts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -117,6 +123,7 @@ func main() {
 	http.HandleFunc("/create-topic", createTopic)
 	http.HandleFunc("/post-content", getPostContent)
 	http.HandleFunc("/like-post", addLike)
+	http.HandleFunc("/dislike-post", addDislike)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("Server started at :8080")
@@ -531,6 +538,7 @@ func getPosts(topicTitle string, nbOfPosts ...int) []Post {
 			return nil
 		}
 		post.Likes = likeCount(post.ID)
+		post.Dislikes = dislikeCount(post.ID)
 		posts = append(posts, post)
 	}
 	return posts
@@ -557,6 +565,16 @@ func getComment(title string) []Comment {
 func likeCount(postID int) int {
 	var count int
 	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE title = ?", postID).Scan(&count)
+	if err != nil {
+		return 0
+	}
+	return count
+
+}
+
+func dislikeCount(postID int) int {
+	var count int
+	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE title = ?", postID).Scan(&count)
 	if err != nil {
 		return 0
 	}
@@ -605,12 +623,13 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 		Comment []Comment
 	}{
 		Post: Post{
-			ID:      postIDInt,
-			Title:   title,
-			Content: content,
-			User:    user,
-			Topic:   topic,
-			Likes:   likeCount(postIDInt),
+			ID:       postIDInt,
+			Title:    title,
+			Content:  content,
+			User:     user,
+			Topic:    topic,
+			Likes:    likeCount(postIDInt),
+			Dislikes: dislikeCount(postIDInt),
 		},
 		Comment: getComment(title),
 	}
@@ -643,7 +662,9 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var existingLike int
+	var existingDislike int
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
 	if err != nil {
 		http.Error(w, "Erreur lors de la vérification des likes", http.StatusInternalServerError)
 		return
@@ -656,11 +677,72 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Erreur lors de la suppression du like", http.StatusInternalServerError)
 			return
 		}
-	} else {
+	} else if existingDislike > 0 {
 		// If no like exists, add a new one
+		_, err = db.ExecContext(context.Background(), "INSERT INTO likes (user, title) VALUES (?, ?)", username, postIDInt)
+		_, err = db.ExecContext(context.Background(), "DELETE FROM dislikes WHERE user = ? AND title = ?", username, postIDInt)
+		if err != nil {
+			http.Error(w, "Erreur lors de l'ajout du like", http.StatusInternalServerError)
+			return
+		}
+	} else {
 		_, err = db.ExecContext(context.Background(), "INSERT INTO likes (user, title) VALUES (?, ?)", username, postIDInt)
 		if err != nil {
 			http.Error(w, "Erreur lors de l'ajout du like", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/post-content?postID=%d", postIDInt), http.StatusSeeOther)
+}
+
+func addDislike(w http.ResponseWriter, r *http.Request) {
+	postID := r.URL.Query().Get("postID")
+	postIDInt, err := strconv.Atoi(postID)
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+	}
+	if postID == "" {
+		http.Error(w, "Message non spécifié", http.StatusBadRequest)
+		return
+	}
+
+	session, _ := store.Get(r, "session")
+	username, ok := session.Values["username"]
+	if !ok {
+		http.Error(w, "Vous devez être connecté pour aimer un message", http.StatusUnauthorized)
+		return
+	}
+
+	var existingDislike int
+	var existingLike int
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
+	if err != nil {
+		http.Error(w, "Erreur lors de la vérification des dislikes", http.StatusInternalServerError)
+		return
+	}
+
+	if existingDislike > 0 {
+		// If a dislike exists, delete it
+		_, err = db.ExecContext(context.Background(), "DELETE FROM dislikes WHERE user = ? AND title = ?", username, postIDInt)
+		if err != nil {
+			http.Error(w, "Erreur lors de la suppression du dislike", http.StatusInternalServerError)
+			return
+		}
+	} else if existingLike > 0 {
+		// If no dislike exists, add a new one
+		_, err = db.ExecContext(context.Background(), "INSERT INTO dislikes (user, title) VALUES (?, ?)", username, postIDInt)
+		_, err = db.ExecContext(context.Background(), "DELETE FROM likes WHERE user = ? AND title = ?", username, postIDInt)
+		if err != nil {
+			http.Error(w, "Erreur lors de l'ajout du dislike", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		_, err = db.ExecContext(context.Background(), "INSERT INTO dislikes (user, title) VALUES (?, ?)", username, postIDInt)
+		if err != nil {
+			http.Error(w, "Erreur lors de l'ajout du dislike", http.StatusInternalServerError)
 			return
 		}
 	}
