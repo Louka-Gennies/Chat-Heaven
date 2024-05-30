@@ -30,10 +30,8 @@ header a {
     color: black;
 }
 
-.title {
-    font-size: 35px;
-    font-weight: 500;
-    margin-left: 2%;
+.logo {
+    height: 50px;
 }
 
 .bold {
