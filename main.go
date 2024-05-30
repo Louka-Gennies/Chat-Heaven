@@ -337,6 +337,26 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
+
+	session, _ := store.Get(r, "session")
+	username, ok := session.Values["username"]
+	if !ok {
+		tmpl, err := template.ParseFiles("templates/home.html")
+		if err != nil {
+			http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, nil)
+		return
+	}
+
+	var profilePicture string
+	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+	if err != nil {
+		http.Error(w, "Erreur lors de la récupération de la photo de profil", http.StatusInternalServerError)
+		return
+	}
+
 	tmpl, err := template.ParseFiles("templates/create-post.html")
 	if err != nil {
 		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
@@ -346,9 +366,13 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	topic := r.URL.Query().Get("topic")
 
 	data := struct {
-		Topic string
+		Topic          string
+		Username       string
+		ProfilePicture string
 	}{
-		Topic: topic,
+		Topic:          topic,
+		Username:       username.(string),
+		ProfilePicture: profilePicture,
 	}
 
 	if r.Method == "POST" {
@@ -408,6 +432,31 @@ func topicsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createTopic(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session")
+	username, ok := session.Values["username"]
+	if !ok {
+		tmpl, err := template.ParseFiles("templates/home.html")
+		if err != nil {
+			http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, nil)
+		return
+	}
+
+	var profilePicture string
+	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+	if err != nil {
+		http.Error(w, "Erreur lors de la récupération de la photo de profil", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("templates/create-topic.html")
+	if err != nil {
+		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		return
+	}
+
 	if r.Method == "POST" {
 
 		session, _ := store.Get(r, "session")
@@ -420,20 +469,26 @@ func createTopic(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Vous devez être connecté pour poster un message", http.StatusUnauthorized)
 			return
 		}
-
-		if r.Method == "POST" {
-			_, err := db.ExecContext(context.Background(), "INSERT INTO topics (user, title, description) VALUES (?, ?, ?)", username, title, description)
-			if err != nil {
-				fmt.Println(err)
-				http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
-				return
-			}
+		_, err := db.ExecContext(context.Background(), "INSERT INTO topics (user, title, description) VALUES (?, ?, ?)", username, title, description)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
+			return
 		}
+
 		fmt.Println("topic ajouté avec succès !")
 		http.Redirect(w, r, "/topics", http.StatusSeeOther)
 
 	}
-	http.ServeFile(w, r, "templates/create-topic.html")
+	data := struct {
+		Username       string
+		ProfilePicture string
+	}{
+		Username:       username.(string),
+		ProfilePicture: profilePicture,
+	}
+
+	tmpl.Execute(w, data)
 }
 
 func countPosts() int {

@@ -23,15 +23,16 @@
         <div class="login"><a href="/login">Login</a></div>
         {{end}}
     </header>
-<div class= "main"> 
-    <form action="/create-post" method="post">
-        <label for="title">Title:</label><br>
-        <input type="text" id="title" name="title"><br>
-        <label for="content">Content:</label><br>
-        <textarea id="description" name="description"></textarea><br>
-        <input type="submit" value="Submit">
-    </form>
-</div>
+    <div class= "main"> 
+        <form action="/create-post" method="post" enctype="multipart/form-data">
+            <label for="title">Title:</label><br>
+            <input type="text" id="title" name="title"><br>
+            <label for="content">Content:</label><br>
+            <textarea id="description" name="description"></textarea><br>
+            <input type="file" id="image" name="image"><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
     <div class="link-container">
         <button class="button-link return-button" onclick="location.href='/post'">Return</button>
         <button class="button-link home-button" onclick="location.href='/'">Home</button>
