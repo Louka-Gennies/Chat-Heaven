@@ -71,6 +71,8 @@ func main() {
 		user TEXT NOT NULL,
 		topic_likes INTEGER,
 		FOREIGN KEY (user) REFERENCES users(username)
+			DELETE CASCADE
+			UPDATE CASCADE
 	)`)
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS likes (
@@ -78,7 +80,11 @@ func main() {
 		user TEXT NOT NULL,
 		title TEXT NOT NULL,
 		FOREIGN KEY (user) REFERENCES users(username),
+			DELETE CASCADE
+			UPDATE CASCADE
 		FOREIGN KEY (title) REFERENCES posts(title)
+			DELETE CASCADE
+			UPDATE CASCADE
 	)`)
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS dislikes (
@@ -86,7 +92,11 @@ func main() {
     		user TEXT NOT NULL,
     		title TEXT NOT NULL,
     		FOREIGN KEY (user) REFERENCES users(username),
+				DELETE CASCADE
+				UPDATE CASCADE
     		FOREIGN KEY (title) REFERENCES posts(title)
+				DELETE CASCADE
+				UPDATE CASCADE
     	)`)
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS posts (
@@ -97,7 +107,11 @@ func main() {
 		user TEXT NOT NULL,
 		topic TEXT NOT NULL,
 		FOREIGN KEY (user) REFERENCES users(username)
+			DELETE CASCADE
+			UPDATE CASCADE
 		FOREIGN KEY (topic) REFERENCES topics(title)
+			DELETE CASCADE
+			UPDATE CASCADE
 	)`)
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS comments (
@@ -106,7 +120,11 @@ func main() {
     		user TEXT NOT NULL,
     		post TEXT NOT NULL,
     		FOREIGN KEY (user) REFERENCES users(username),
+				DELETE CASCADE
+				UPDATE CASCADE
     		FOREIGN KEY (post) REFERENCES posts(title)
+				DELETE CASCADE
+				UPDATE CASCADE
     	)`)
 	if err != nil {
 		log.Fatal(err)
@@ -719,9 +737,13 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 	var existingLike int
 	var existingDislike int
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
-	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
 	if err != nil {
 		http.Error(w, "Erreur lors de la vérification des likes", http.StatusInternalServerError)
+		return
+	}
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
+	if err != nil {
+		http.Error(w, "Erreur lors de la vérification des dislikes", http.StatusInternalServerError)
 		return
 	}
 
@@ -735,9 +757,13 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 	} else if existingDislike > 0 {
 		// If no like exists, add a new one
 		_, err = db.ExecContext(context.Background(), "INSERT INTO likes (user, title) VALUES (?, ?)", username, postIDInt)
-		_, err = db.ExecContext(context.Background(), "DELETE FROM dislikes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
 			http.Error(w, "Erreur lors de l'ajout du like", http.StatusInternalServerError)
+			return
+		}
+		_, err = db.ExecContext(context.Background(), "DELETE FROM dislikes WHERE user = ? AND title = ?", username, postIDInt)
+		if err != nil {
+			http.Error(w, "Erreur lors de l'ajout du dislike", http.StatusInternalServerError)
 			return
 		}
 	} else {
@@ -773,9 +799,13 @@ func addDislike(w http.ResponseWriter, r *http.Request) {
 	var existingDislike int
 	var existingLike int
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
-	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
 	if err != nil {
 		http.Error(w, "Erreur lors de la vérification des dislikes", http.StatusInternalServerError)
+		return
+	}
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
+	if err != nil {
+		http.Error(w, "Erreur lors de la vérification des likes", http.StatusInternalServerError)
 		return
 	}
 
@@ -789,9 +819,13 @@ func addDislike(w http.ResponseWriter, r *http.Request) {
 	} else if existingLike > 0 {
 		// If no dislike exists, add a new one
 		_, err = db.ExecContext(context.Background(), "INSERT INTO dislikes (user, title) VALUES (?, ?)", username, postIDInt)
-		_, err = db.ExecContext(context.Background(), "DELETE FROM likes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
 			http.Error(w, "Erreur lors de l'ajout du dislike", http.StatusInternalServerError)
+			return
+		}
+		_, err = db.ExecContext(context.Background(), "DELETE FROM likes WHERE user = ? AND title = ?", username, postIDInt)
+		if err != nil {
+			http.Error(w, "Erreur lors de l'ajout du likes", http.StatusInternalServerError)
 			return
 		}
 	} else {
