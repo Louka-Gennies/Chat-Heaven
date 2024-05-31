@@ -4,6 +4,7 @@ html {
     background-image: url(../img/home-background.svg);
     background-position: bottom;
     background-repeat: no-repeat;
+    background-attachment: fixed;
     font-family: Inter;
     height: 100%;
     width: 100%;
@@ -23,6 +24,11 @@ header {
     padding: 15px 0px;
     text-align: center;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: white;
+    z-index: 1000;
 }
 
 header a {
@@ -119,6 +125,7 @@ main {
 }
 
 .stats {
+    padding-top: 70px ;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
