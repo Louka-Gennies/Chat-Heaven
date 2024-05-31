@@ -59,76 +59,76 @@ func main() {
         profile_picture TEXT,
         user_likes INTEGER
     )`)
-	if err != nil {
-		log.Fatal(err)
-	}
+    if err != nil {
+        log.Fatal(err)
+    }
 
-	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS topics (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		title TEXT NOT NULL UNIQUE,
-		description TEXT NOT NULL,
-		picture TEXT,
-		user TEXT NOT NULL,
-		topic_likes INTEGER,
-		FOREIGN KEY (user) REFERENCES users(username)
-			DELETE CASCADE
-			UPDATE CASCADE
-	)`)
+    _, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS topics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL UNIQUE,
+        description TEXT NOT NULL,
+        picture TEXT,
+        user TEXT NOT NULL,
+        topic_likes INTEGER,
+        FOREIGN KEY (user) REFERENCES users(username)
+           ON DELETE CASCADE
+           ON UPDATE CASCADE
+    )`)
 
-	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS likes (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user TEXT NOT NULL,
-		title TEXT NOT NULL,
-		FOREIGN KEY (user) REFERENCES users(username),
-			DELETE CASCADE
-			UPDATE CASCADE
-		FOREIGN KEY (title) REFERENCES posts(title)
-			DELETE CASCADE
-			UPDATE CASCADE
-	)`)
+    _, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS likes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user TEXT NOT NULL,
+        title TEXT NOT NULL,
+        FOREIGN KEY (user) REFERENCES users(username)
+           ON DELETE CASCADE
+           ON UPDATE CASCADE,
+        FOREIGN KEY (title) REFERENCES posts(title)
+           ON DELETE CASCADE
+           ON UPDATE CASCADE
+    )`)
 
-	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS dislikes (
-    		id INTEGER PRIMARY KEY AUTOINCREMENT,
-    		user TEXT NOT NULL,
-    		title TEXT NOT NULL,
-    		FOREIGN KEY (user) REFERENCES users(username),
-				DELETE CASCADE
-				UPDATE CASCADE
-    		FOREIGN KEY (title) REFERENCES posts(title)
-				DELETE CASCADE
-				UPDATE CASCADE
-    	)`)
+    _, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS dislikes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user TEXT NOT NULL,
+            title TEXT NOT NULL,
+            FOREIGN KEY (user) REFERENCES users(username)
+               ON DELETE CASCADE
+               ON UPDATE CASCADE,
+            FOREIGN KEY (title) REFERENCES posts(title)
+               ON DELETE CASCADE
+               ON UPDATE CASCADE
+        )`)
 
-	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS posts (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		title TEXT NOT NULL UNIQUE,
-		content TEXT NOT NULL,
-		picture TEXT,
-		user TEXT NOT NULL,
-		topic TEXT NOT NULL,
-		FOREIGN KEY (user) REFERENCES users(username)
-			DELETE CASCADE
-			UPDATE CASCADE
-		FOREIGN KEY (topic) REFERENCES topics(title)
-			DELETE CASCADE
-			UPDATE CASCADE
-	)`)
+    _, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL UNIQUE,
+        content TEXT NOT NULL,
+        picture TEXT,
+        user TEXT NOT NULL,
+        topic TEXT NOT NULL,
+        FOREIGN KEY (user) REFERENCES users(username)
+           ON DELETE CASCADE
+           ON UPDATE CASCADE,
+        FOREIGN KEY (topic) REFERENCES topics(title)
+           ON DELETE CASCADE
+           ON UPDATE CASCADE
+    )`)
 
-	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS comments (
-    		id INTEGER PRIMARY KEY AUTOINCREMENT,
-    		content TEXT NOT NULL,
-    		user TEXT NOT NULL,
-    		post TEXT NOT NULL,
-    		FOREIGN KEY (user) REFERENCES users(username),
-				DELETE CASCADE
-				UPDATE CASCADE
-    		FOREIGN KEY (post) REFERENCES posts(title)
-				DELETE CASCADE
-				UPDATE CASCADE
-    	)`)
-	if err != nil {
-		log.Fatal(err)
-	}
+    _, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content TEXT NOT NULL,
+            user TEXT NOT NULL,
+            post TEXT NOT NULL,
+            FOREIGN KEY (user) REFERENCES users(username)
+               ON DELETE CASCADE
+               ON UPDATE CASCADE,
+            FOREIGN KEY (post) REFERENCES posts(title)
+               ON DELETE CASCADE
+               ON UPDATE CASCADE
+        )`)
+    if err != nil {
+        log.Fatal(err)
+    }
 
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/register", registerHandler)
@@ -153,44 +153,59 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	username, ok := session.Values["username"]
 
 	if !ok {
+		data := struct {
+			Username       string
+			ProfilePicture string
+			NbPosts        int
+			NbTopics       int
+			NbUsers        int
+			Last4Topics    []Topic
+		}{
+			Username:       "username",
+			ProfilePicture: "./static/uploads/blank-pfp.png",
+			NbPosts:        countPosts(),
+			NbTopics:       countTopics(),
+			NbUsers:        countUsers(),
+			Last4Topics:    getTopics(4),
+		}
+
 		tmpl, err := template.ParseFiles("templates/home.html")
 		if err != nil {
 			http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
 			return
 		}
-		tmpl.Execute(w, nil)
-		return
-	}
+		tmpl.Execute(w, data)
+	} else if ok {
+		var profilePicture string
+		err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+		if err != nil {
+			http.Error(w, "Erreur lors de la récupération de la photo de profil", http.StatusInternalServerError)
+			return
+		}
 
-	var profilePicture string
-	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
-	if err != nil {
-		http.Error(w, "Erreur lors de la récupération de la photo de profil", http.StatusInternalServerError)
-		return
-	}
+		data := struct {
+			Username       string
+			ProfilePicture string
+			NbPosts        int
+			NbTopics       int
+			NbUsers        int
+			Last4Topics    []Topic
+		}{
+			Username:       username.(string),
+			ProfilePicture: profilePicture,
+			NbPosts:        countPosts(),
+			NbTopics:       countTopics(),
+			NbUsers:        countUsers(),
+			Last4Topics:    getTopics(4),
+		}
 
-	data := struct {
-		Username       string
-		ProfilePicture string
-		NbPosts        int
-		NbTopics       int
-		NbUsers        int
-		Last4Topics    []Topic
-	}{
-		Username:       username.(string),
-		ProfilePicture: profilePicture,
-		NbPosts:        countPosts(),
-		NbTopics:       countTopics(),
-		NbUsers:        countUsers(),
-		Last4Topics:    getTopics(4),
+		tmpl, err := template.ParseFiles("templates/home.html")
+		if err != nil {
+			http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, data)
 	}
-
-	tmpl, err := template.ParseFiles("templates/home.html")
-	if err != nil {
-		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, data)
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
