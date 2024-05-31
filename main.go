@@ -137,7 +137,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		tmpl, err := template.ParseFiles("templates/home.html")
 		if err != nil {
-			http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 			return
 		}
 		tmpl.Execute(w, nil)
@@ -147,7 +147,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	var profilePicture string
 	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
 	if err != nil {
-		http.Error(w, "Erreur lors de la récupération de la photo de profil", http.StatusInternalServerError)
+		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
 		return
 	}
 
@@ -169,7 +169,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/home.html")
 	if err != nil {
-		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 		return
 	}
 	tmpl.Execute(w, data)
@@ -181,9 +181,9 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
 
-		err := ajouterUtilisateur(username, email, password, "./static/uploads/blank-pfp.png")
+		err := addUser(username, email, password, "./static/uploads/blank-pfp.png")
 		if err != nil {
-			http.Error(w, "Erreur lors de l'inscription", http.StatusInternalServerError)
+			http.Error(w, "Error during registration", http.StatusInternalServerError)
 			return
 		}
 
@@ -198,7 +198,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/register.html")
 	if err != nil {
-		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 		return
 	}
 	tmpl.Execute(w, nil)
@@ -211,9 +211,9 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 
-		err := verifierUtilisateur(username, password)
+		err := verifyUser(username, password)
 		if err != nil {
-			http.Error(w, "Nom d'utilisateur ou mot de passe incorrect", http.StatusUnauthorized)
+			http.Error(w, "Incorrect username or password", http.StatusUnauthorized)
 			return
 		}
 
@@ -228,7 +228,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 func userHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.URL.Query().Get("username")
 	if username == "" {
-		http.Error(w, "Utilisateur non spécifié", http.StatusBadRequest)
+		http.Error(w, "User not specified", http.StatusBadRequest)
 		return
 	}
 
@@ -237,7 +237,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 		query := `SELECT email, profile_picture FROM users WHERE username = ?`
 		err := db.QueryRowContext(context.Background(), query, username).Scan(&email, &profilePicture)
 		if err != nil {
-			http.Error(w, "Utilisateur non trouvé", http.StatusNotFound)
+			http.Error(w, "User not found", http.StatusNotFound)
 			return
 		}
 
@@ -253,14 +253,14 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 
 		tmpl, err := template.ParseFiles("templates/user.html")
 		if err != nil {
-			http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 			return
 		}
 		tmpl.Execute(w, data)
 	} else if r.Method == "POST" {
 		file, handler, err := r.FormFile("profile_picture")
 		if err != nil {
-			http.Error(w, "Erreur lors du téléchargement du fichier", http.StatusInternalServerError)
+			http.Error(w, "Error during file upload", http.StatusInternalServerError)
 			return
 		}
 		defer file.Close()
@@ -270,7 +270,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 		filePath := filepath.Join("static/uploads", handler.Filename)
 		f, err := os.Create(filePath)
 		if err != nil {
-			http.Error(w, "Erreur lors de la sauvegarde du fichier", http.StatusInternalServerError)
+			http.Error(w, "Error saving the file", http.StatusInternalServerError)
 			return
 		}
 		defer f.Close()
@@ -279,7 +279,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 		updateSQL := `UPDATE users SET profile_picture = ? WHERE username = ?`
 		_, err = db.ExecContext(context.Background(), updateSQL, "/static/uploads/"+handler.Filename, username)
 		if err != nil {
-			http.Error(w, "Erreur lors de la mise à jour de la photo de profil", http.StatusInternalServerError)
+			http.Error(w, "Error updating the profile picture", http.StatusInternalServerError)
 			return
 		}
 
@@ -294,7 +294,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func ajouterUtilisateur(username, email, motDePasse, profilePicture string) error {
+func addUser(username, email, motDePasse, profilePicture string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(motDePasse), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -308,7 +308,7 @@ func ajouterUtilisateur(username, email, motDePasse, profilePicture string) erro
 	return nil
 }
 
-func verifierUtilisateur(username, motDePasse string) error {
+func verifyUser(username, motDePasse string) error {
 	var motDePasseDB string
 	err := db.QueryRowContext(context.Background(), "SELECT mot_de_passe FROM users WHERE username = ?", username).Scan(&motDePasseDB)
 	if err != nil {
@@ -317,7 +317,7 @@ func verifierUtilisateur(username, motDePasse string) error {
 
 	err = bcrypt.CompareHashAndPassword([]byte(motDePasseDB), []byte(motDePasse))
 	if err != nil {
-		return fmt.Errorf("mot de passe incorrect")
+		return fmt.Errorf("incorrect password")
 	}
 	return nil
 }
@@ -328,7 +328,7 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/post.html")
 	if err != nil {
-		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 		return
 	}
 
@@ -350,7 +350,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		tmpl, err := template.ParseFiles("templates/home.html")
 		if err != nil {
-			http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 			return
 		}
 		tmpl.Execute(w, nil)
@@ -360,13 +360,13 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	var profilePicture string
 	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
 	if err != nil {
-		http.Error(w, "Erreur lors de la récupération de la photo de profil", http.StatusInternalServerError)
+		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
 		return
 	}
 
 	tmpl, err := template.ParseFiles("templates/create-post.html")
 	if err != nil {
-		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 		return
 	}
 
@@ -388,16 +388,16 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		title, content, topicTitle := r.FormValue("title"), r.FormValue("content"), r.FormValue("topic")
 
 		if !ok {
-			http.Error(w, "Vous devez être connecté pour poster un message", http.StatusUnauthorized)
+			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
 			return
 		}
 		_, err := db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic) VALUES (?, ?, ?, ?)", username, title, content, topicTitle)
 		if err != nil {
 			fmt.Println(err)
-			http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
+			http.Error(w, "Error posting the message", http.StatusInternalServerError)
 			return
 		}
-		fmt.Println("Post ajouté avec succès !")
+		fmt.Println("Post added successfully!")
 		http.Redirect(w, r, fmt.Sprintf("/posts?topic=%s", topic), http.StatusSeeOther)
 
 	}
@@ -408,14 +408,14 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 func topicsHandler(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.QueryContext(context.Background(), "SELECT title, description FROM topics")
 	if err != nil {
-		http.Error(w, "Erreur lors de la récupération des messages", http.StatusInternalServerError)
+		http.Error(w, "Error retrieving the messages", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
 
 	tmpl, err := template.ParseFiles("templates/topic.html")
 	if err != nil {
-		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 		return
 	}
 
@@ -423,7 +423,7 @@ func topicsHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var topic Topic
 		if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
-			http.Error(w, "Erreur lors de la lecture des messages", http.StatusInternalServerError)
+			http.Error(w, "Error reading the messages", http.StatusInternalServerError)
 			return
 		}
 		Topics = append(Topics, topic)
@@ -444,7 +444,7 @@ func createTopic(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		tmpl, err := template.ParseFiles("templates/home.html")
 		if err != nil {
-			http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 			return
 		}
 		tmpl.Execute(w, nil)
@@ -454,13 +454,13 @@ func createTopic(w http.ResponseWriter, r *http.Request) {
 	var profilePicture string
 	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
 	if err != nil {
-		http.Error(w, "Erreur lors de la récupération de la photo de profil", http.StatusInternalServerError)
+		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
 		return
 	}
 
 	tmpl, err := template.ParseFiles("templates/create-topic.html")
 	if err != nil {
-		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 		return
 	}
 
@@ -473,17 +473,17 @@ func createTopic(w http.ResponseWriter, r *http.Request) {
 		title, description := r.FormValue("title"), r.FormValue("description")
 
 		if !ok {
-			http.Error(w, "Vous devez être connecté pour poster un message", http.StatusUnauthorized)
+			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
 			return
 		}
 		_, err := db.ExecContext(context.Background(), "INSERT INTO topics (user, title, description) VALUES (?, ?, ?)", username, title, description)
 		if err != nil {
 			fmt.Println(err)
-			http.Error(w, "Erreur lors de la publication du message", http.StatusInternalServerError)
+			http.Error(w, "Error posting the message", http.StatusInternalServerError)
 			return
 		}
 
-		fmt.Println("topic ajouté avec succès !")
+		fmt.Println("Topic added successfully!")
 		http.Redirect(w, r, "/topics", http.StatusSeeOther)
 
 	}
@@ -645,14 +645,14 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	if postID == "" {
-		http.Error(w, "Message non spécifié", http.StatusBadRequest)
+		http.Error(w, "Message not specified", http.StatusBadRequest)
 		return
 	}
 
 	var title, content, user, topic string
 	err = db.QueryRowContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE id = ?", postIDInt).Scan(&title, &content, &user, &topic)
 	if err != nil {
-		http.Error(w, "Message non trouvé", http.StatusNotFound)
+		http.Error(w, "Message not found", http.StatusNotFound)
 		return
 	}
 
@@ -661,12 +661,12 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 		username, ok := session.Values["username"]
 		comment := r.FormValue("content")
 		if !ok {
-			http.Error(w, "Vous devez être connecté pour commenter un message", http.StatusUnauthorized)
+			http.Error(w, "You must be logged in to comment on a message", http.StatusUnauthorized)
 			return
 		}
 		_, err := db.ExecContext(context.Background(), "INSERT INTO comments (user, content, post) VALUES (?, ?, ?)", username, comment, title)
 		if err != nil {
-			http.Error(w, "Erreur lors de la publication du commentaire", http.StatusInternalServerError)
+			http.Error(w, "Error posting the comment", http.StatusInternalServerError)
 			return
 		}
 		http.Redirect(w, r, fmt.Sprintf("/post-content?postID=%d", postIDInt), http.StatusSeeOther)
@@ -691,7 +691,7 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/post-content.html")
 	if err != nil {
-		http.Error(w, "Erreur de lecture du fichier HTML", http.StatusInternalServerError)
+		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 		return
 	}
 	tmpl.Execute(w, data)
@@ -705,14 +705,14 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	if postID == "" {
-		http.Error(w, "Message non spécifié", http.StatusBadRequest)
+		http.Error(w, "Message not specified", http.StatusBadRequest)
 		return
 	}
 
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
-		http.Error(w, "Vous devez être connecté pour aimer un message", http.StatusUnauthorized)
+		http.Error(w, "You must be logged in to like a message", http.StatusUnauthorized)
 		return
 	}
 
@@ -721,7 +721,7 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
 	if err != nil {
-		http.Error(w, "Erreur lors de la vérification des likes", http.StatusInternalServerError)
+		http.Error(w, "Error checking the likes", http.StatusInternalServerError)
 		return
 	}
 
@@ -729,7 +729,7 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 		// If a like exists, delete it
 		_, err = db.ExecContext(context.Background(), "DELETE FROM likes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Erreur lors de la suppression du like", http.StatusInternalServerError)
+			http.Error(w, "Error deleting the like", http.StatusInternalServerError)
 			return
 		}
 	} else if existingDislike > 0 {
@@ -737,13 +737,13 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 		_, err = db.ExecContext(context.Background(), "INSERT INTO likes (user, title) VALUES (?, ?)", username, postIDInt)
 		_, err = db.ExecContext(context.Background(), "DELETE FROM dislikes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Erreur lors de l'ajout du like", http.StatusInternalServerError)
+			http.Error(w, "Error adding the like", http.StatusInternalServerError)
 			return
 		}
 	} else {
 		_, err = db.ExecContext(context.Background(), "INSERT INTO likes (user, title) VALUES (?, ?)", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Erreur lors de l'ajout du like", http.StatusInternalServerError)
+			http.Error(w, "Error adding the like", http.StatusInternalServerError)
 			return
 		}
 	}
@@ -759,14 +759,14 @@ func addDislike(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	if postID == "" {
-		http.Error(w, "Message non spécifié", http.StatusBadRequest)
+		http.Error(w, "Message not specified", http.StatusBadRequest)
 		return
 	}
 
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
-		http.Error(w, "Vous devez être connecté pour aimer un message", http.StatusUnauthorized)
+		http.Error(w, "You must be logged in to like a message", http.StatusUnauthorized)
 		return
 	}
 
@@ -775,7 +775,7 @@ func addDislike(w http.ResponseWriter, r *http.Request) {
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
 	if err != nil {
-		http.Error(w, "Erreur lors de la vérification des dislikes", http.StatusInternalServerError)
+		http.Error(w, "Error checking the dislikes", http.StatusInternalServerError)
 		return
 	}
 
@@ -783,7 +783,7 @@ func addDislike(w http.ResponseWriter, r *http.Request) {
 		// If a dislike exists, delete it
 		_, err = db.ExecContext(context.Background(), "DELETE FROM dislikes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Erreur lors de la suppression du dislike", http.StatusInternalServerError)
+			http.Error(w, "Error deleting the dislike", http.StatusInternalServerError)
 			return
 		}
 	} else if existingLike > 0 {
@@ -791,13 +791,13 @@ func addDislike(w http.ResponseWriter, r *http.Request) {
 		_, err = db.ExecContext(context.Background(), "INSERT INTO dislikes (user, title) VALUES (?, ?)", username, postIDInt)
 		_, err = db.ExecContext(context.Background(), "DELETE FROM likes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Erreur lors de l'ajout du dislike", http.StatusInternalServerError)
+			http.Error(w, "Error adding the dislike", http.StatusInternalServerError)
 			return
 		}
 	} else {
 		_, err = db.ExecContext(context.Background(), "INSERT INTO dislikes (user, title) VALUES (?, ?)", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Erreur lors de l'ajout du dislike", http.StatusInternalServerError)
+			http.Error(w, "Error adding the dislike", http.StatusInternalServerError)
 			return
 		}
 	}

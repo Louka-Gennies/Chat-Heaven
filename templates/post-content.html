@@ -16,21 +16,21 @@
   <input type="submit" value="Dislike">
 </form>
 
-<h2>Commentaires</h2>
+<h2>Comments</h2>
 {{range .Comment}}
 <div>
   <p>{{.Content}}</p>
-  <p>Posté par {{.User}}</p>
+  <p>Post by {{.User}}</p>
 </div>
 {{end}}
 
-<h2>Ajouter un commentaire</h2>
+<h2>Add a comment</h2>
 <form action="/post-content?postID={{.Post.ID}}" method="post">
-  <label for="content">Contenu du commentaire:</label><br>
+  <label for="content">Comment content:</label><br>
   <textarea id="content" name="content" rows="4" cols="50"></textarea><br>
-  <input type="submit" value="Ajouter un commentaire">
+  <input type="submit" value="Add a comment">
 </form>
 
-<a href="/posts?topic={{.Post.Topic}}">Retour aux posts</a>
+<a href="/posts?topic={{.Post.Topic}}">Back to posts</a>
 </body>
 </html>

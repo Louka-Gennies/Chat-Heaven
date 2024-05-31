@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil Utilisateur</title>
+    <title>User Profile</title>
 </head>
 <body>
-    <h1>Profil de {{.Username}}</h1>
-    <p>Email: {{.Email}}</p>
-    {{if .ProfilePicture}}
-        <img src="{{.ProfilePicture}}" alt="Photo de profil" style="width:150px;height:150px;">
-    {{end}}
-    <form action="/user?username={{.Username}}" method="POST" enctype="multipart/form-data">
-        <label for="profile_picture">Changer la photo de profil :</label>
-        <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
-        <br>
-        <input type="submit" value="Télécharger">
-    </form>
+<h1>Profile of {{.Username}}</h1>
+<p>Email: {{.Email}}</p>
+{{if .ProfilePicture}}
+<img src="{{.ProfilePicture}}" alt="Profile picture" style="width:150px;height:150px;">
+{{end}}
+<form action="/user?username={{.Username}}" method="POST" enctype="multipart/form-data">
+    <label for="profile_picture">Change profile picture:</label>
+    <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
     <br>
-    <a href="/">Retour à l'accueil</a>
-    <br>
-    <form action="/logout" method="POST" style="display: inline;">
-        <input type="submit" value="Se déconnecter">
-    </form>
+    <input type="submit" value="Upload">
+</form>
+<br>
+<a href="/">Back to home</a>
+<br>
+<form action="/logout" method="POST" style="display: inline;">
+    <input type="submit" value="Log out">
+</form>
 </body>
 </html>
