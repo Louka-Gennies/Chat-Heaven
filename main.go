@@ -325,6 +325,25 @@ func verifyUser(username, motDePasse string) error {
 func postsHandler(w http.ResponseWriter, r *http.Request) {
 	topic := r.URL.Query().Get("topic")
 	Posts := getPosts(topic)
+	session, _ := store.Get(r, "session")
+	username, ok := session.Values["username"]
+	if !ok {
+		tmpl, err := template.ParseFiles("templates/home.html")
+		if err != nil {
+			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, nil)
+		return
+	}
+
+	var profilePicture string
+	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+	if err != nil {
+		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
+		return
+	}
+
 
 	tmpl, err := template.ParseFiles("templates/post.html")
 	if err != nil {
@@ -335,9 +354,13 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Topic string
 		Post  []Post
+		Username       string
+		ProfilePicture string
 	}{
 		Topic: topic,
 		Post:  Posts,
+		Username:       username.(string),
+		ProfilePicture: profilePicture,
 	}
 
 	tmpl.Execute(w, data)
@@ -406,6 +429,25 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func topicsHandler(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session")
+	username, ok := session.Values["username"]
+	if !ok {
+		tmpl, err := template.ParseFiles("templates/home.html")
+		if err != nil {
+			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, nil)
+		return
+	}
+
+	var profilePicture string
+	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+	if err != nil {
+		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
+		return
+	}
+
 	rows, err := db.QueryContext(context.Background(), "SELECT title, description FROM topics")
 	if err != nil {
 		http.Error(w, "Error retrieving the messages", http.StatusInternalServerError)
@@ -431,8 +473,12 @@ func topicsHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
 		Topic []Topic
+		Username       string
+		ProfilePicture string
 	}{
 		Topic: Topics,
+		Username:       username.(string),
+		ProfilePicture: profilePicture,
 	}
 
 	tmpl.Execute(w, data)
@@ -640,6 +686,24 @@ func dislikeCount(postID int) int {
 func getPostContent(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
+	session, _ := store.Get(r, "session")
+	username, ok := session.Values["username"]
+	if !ok {
+		tmpl, err := template.ParseFiles("templates/home.html")
+		if err != nil {
+			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, nil)
+		return
+	}
+
+	var profilePicture string
+	err = db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+	if err != nil {
+		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
+		return
+	}
 	if err != nil {
 		// handle error
 		fmt.Println(err)
@@ -648,6 +712,7 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Message not specified", http.StatusBadRequest)
 		return
 	}
+	
 
 	var title, content, user, topic string
 	err = db.QueryRowContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE id = ?", postIDInt).Scan(&title, &content, &user, &topic)
@@ -676,6 +741,8 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Post    Post
 		Comment []Comment
+		Username       string
+		ProfilePicture string
 	}{
 		Post: Post{
 			ID:       postIDInt,
@@ -685,8 +752,11 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 			Topic:    topic,
 			Likes:    likeCount(postIDInt),
 			Dislikes: dislikeCount(postIDInt),
+			
 		},
 		Comment: getComment(title),
+		Username:       username.(string),
+		ProfilePicture: profilePicture,
 	}
 
 	tmpl, err := template.ParseFiles("templates/post-content.html")
