@@ -164,7 +164,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		NbPosts:        countPosts(),
 		NbTopics:       countTopics(),
 		NbUsers:        countUsers(),
-		Last4Topics:    getTopics(4),
+		Last4Topics:    getTopics(3),
 	}
 
 	tmpl, err := template.ParseFiles("templates/home.html")
