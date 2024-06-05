@@ -3,6 +3,9 @@
 <head>
     <title>Post Submission</title>
     <link rel="stylesheet" href="../static/css/header.css">
+    <link rel="stylesheet" href="../static/css/footer.css">
+    <link rel="stylesheet" href="../static/css/breadcrum.css">
+    <link rel="stylesheet" href="../static/css/posts.css">
 </head>
 <header>
     <div class="title"><a href="/"><span class="bold">Chat</span> Heaven</a></div>
@@ -22,13 +25,37 @@
     {{end}}
 </header>
 <body>
-<h2>Posts</h2>
-{{range .Post}}
-    <a href="/post-content?postID={{.ID}}">{{.Title}}</a>
-    <p>{{.Content}}</p>
-    <p>Likes : {{.Likes}}</p>
-{{end}}
-<a href="/create-post?topic={{.Topic}}">Create a Post</a>
-<a href="/">Home</a>
+<main>
+    <div class="breadcrumb">
+        <a href="/">Main page</a> > <a href="/topics">Topics</a> > <span>Posts</span>
+    </div>
+
+    <h2>Posts</h2>
+    <div class="forum">
+        <table>
+            <tr>
+                <th class="tab-post">Post</th>
+                <th class="post-content">Content</th>
+                <th class="post-likes">Likes</th>
+                <th style="text-align: right;"><a href="/create-topic" class="create-topic">+ New Topic</a></th>
+            </tr>
+            {{range .Post}}
+            <tr>
+                <td>
+                    <div class="post-container">
+                        <a href="/post-content?postID={{.ID}}" class="post-title"><h3>{{.Title}}</h3></a>
+                    </div>
+                </td>
+                <td>{{.Content}}</td>
+                <td>{{.Likes}}</td>
+            </tr>
+            {{end}}
+        </table>
+    </div>
+</main>
+<div class="footer">
+    <p>Chat Heaven©</p>
+</div>
+</body>
 </body>
 </html>

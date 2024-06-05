@@ -5,6 +5,8 @@
     <link rel="stylesheet" href="../static/css/style.css">
     <link rel="stylesheet" href="../static/css/create-topic.css">
     <link rel="stylesheet" href="../static/css/header.css">
+    <link rel="stylesheet" href="../static/css/footer.css">
+    <link rel="stylesheet" href="../static/css/breadcrum.css">
 </head>
 <body>
     <header>
@@ -24,7 +26,12 @@
         <div class="login"><a href="/login">Login</a></div>
         {{end}}
     </header>
-<div class= "main"> 
+    <div class="navigation">
+        <div class="breadcrumb">
+            <a href="/">Main page</a> > <a href="/topics">Community</a> > <span>Create Topic</span>
+        </div>
+    </div>
+<div class= "main">
     <form action="/create-topic" method="post">
         <label for="title">Title:</label><br>
         <input type="text" id="title" name="title"><br>
@@ -37,6 +44,9 @@
         <button class="button-link return-button" onclick="location.href='/topics'">Return</button>
         <button class="button-link home-button" onclick="location.href='/'">Home</button>
     </div>
+</div>
+<div class="footer">
+    <p>Chat Heaven©</p>
 </div>
 </body>
 </html>

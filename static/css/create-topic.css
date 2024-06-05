@@ -4,6 +4,7 @@ html {
     background-image: url(../img/home-background.svg);
     background-position: bottom;
     background-repeat: no-repeat;
+    background-attachment: fixed;
     font-family: Inter;
     height: 100%;
     width: 100%;
@@ -15,11 +16,20 @@ body {
     align-items: center;
 }
 
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    width: 70%;
+    margin-top: 20px;
+}
+
 .main {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 5%;
+    width: 70%;
+    flex-direction: column;
 }
 
 input[type="text"] {
@@ -127,4 +137,6 @@ input[type="submit"] {
 .home-button {
     background: linear-gradient(0deg, #1EE592 0%, #1EE592 100%); /* Vert */
 }
+
+
   

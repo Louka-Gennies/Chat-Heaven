@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="../static/css/header.css">
+  <link rel="stylesheet" href="../static/css/footer.css">
+  <link rel="stylesheet" href="../static/css/breadcrum.css">
   <title>{{.Post.Title}}</title>
 </head>
 <header>
@@ -23,6 +25,9 @@
   {{end}}
 </header>
 <body>
+<div class="breadcrumb">
+    <a href="/">Main page</a> > <a href="/topics">Community</a> > <a href="/posts?topic={{.Post.Topic}}">{{.Post.Topic}}</a> > <span>{{.Post.Title}}</span>
+</div>
 <h1>{{.Post.Title}}</h1>
 <p>{{.Post.Content}}</p>
 <p>Likes : {{.Post.Likes}}</p>
@@ -50,5 +55,8 @@
 </form>
 
 <a href="/posts?topic={{.Post.Topic}}">Back to posts</a>
+<div class="footer">
+  <p>Chat Heaven©</p>
+</div>
 </body>
 </html>

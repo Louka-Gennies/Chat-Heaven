@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="../static/css/style.css">
     <link rel="stylesheet" href="../static/css/create-post.css">
     <link rel="stylesheet" href="../static/css/header.css">
+    <link rel="stylesheet" href="../static/css/footer.css">
 </head>
 <body>
     <header>
@@ -25,6 +26,9 @@
         {{end}}
     </header>
     <div class= "main"> 
+        <div class="breadcrumb">
+            <a href="/">Main page</a> > <a href="/topics">Community</a> > <span>{{.Topic}}</span>
+        </div>
         <form action="/create-post?topic={{.Topic}}" method="post" enctype="multipart/form-data">
             <label for="title">Title:</label><br>
             <input type="text" id="title" name="title"><br>
@@ -39,5 +43,9 @@
         <button class="button-link home-button" onclick="location.href='/'">Home</button>
     </div>
 </div>
+<div class="footer">
+    <p>Chat Heaven©</p>
+</div>
 </body>
+
 </html>
