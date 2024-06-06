@@ -31,23 +31,45 @@
     </div>
 
     <h2>Posts</h2>
+    <div class="button-container">
+        <a href="/create-post?topic={{.Topic}}" class="create-post"> + New Post</a>
+    </div>
     <div class="forum">
         <table>
             <tr>
                 <th class="tab-post">Post</th>
-                <th class="post-content">Content</th>
+                <th class="author">Author</th>
                 <th class="post-likes">Likes</th>
-                <th style="text-align: right;"><a href="/create-topic" class="create-topic">+ New Topic</a></th>
+                <th class="post-dislikes">Dislikes</th>
+                <th class="post-comments">Comments</th>
             </tr>
             {{range .Post}}
             <tr>
                 <td>
                     <div class="post-container">
+                        <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+                            width="47.000000pt" height="42.000000pt" viewBox="0 0 47.000000 42.000000"
+                            preserveAspectRatio="xMidYMid meet">
+
+                            <g transform="translate(0.000000,42.000000) scale(0.100000,-0.100000)"
+                            fill="#000000" stroke="none">
+                            <path d="M154 287 c-2 -7 -4 -52 -2 -98 l3 -84 85 0 85 0 0 95 0 95 -83 3
+                            c-63 2 -84 0 -88 -11z m156 -87 l0 -80 -70 0 -70 0 0 80 0 80 70 0 70 0 0 -80z"/>
+                            <path d="M190 240 c0 -5 11 -10 25 -10 14 0 25 5 25 10 0 6 -11 10 -25 10 -14
+                            0 -25 -4 -25 -10z"/>
+                            <path d="M190 200 c0 -5 23 -10 50 -10 28 0 50 5 50 10 0 6 -22 10 -50 10 -27
+                            0 -50 -4 -50 -10z"/>
+                            <path d="M190 160 c0 -5 23 -10 50 -10 28 0 50 5 50 10 0 6 -22 10 -50 10 -27
+                            0 -50 -4 -50 -10z"/>
+                            </g>
+                        </svg>
                         <a href="/post-content?postID={{.ID}}" class="post-title"><h3>{{.Title}}</h3></a>
                     </div>
                 </td>
-                <td>{{.Content}}</td>
-                <td>{{.Likes}}</td>
+                <td class = "table-author"><strong>By </strong>{{.User}}</td>
+                <td class = "likes">{{.Likes}}</td>
+                <td class = "dislikes">{{.Dislikes}}</td>
+                <td class = "comments">{{.NbComments}}</td>
             </tr>
             {{end}}
         </table>

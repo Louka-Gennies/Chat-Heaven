@@ -47,32 +47,30 @@ main {
     color: #000000;
     font-weight: 550;
     padding: 20px;
-    text-align: left;
     font-size: 24px;
 
 }
 
 .tab-forum {
     border-collapse: collapse;
-    width: 50%;
+    text-align: left;
+    width: 30%;
 }
 
 .nb-post {
-    width: 10%;
+    width: 30%;
+    text-align: center;
 }
 
 .last-post {
-    width: 20%;
+    width: 40%;
+    text-align: left;
 }
 
-.create-topic-table {
-    width: 50%;
+.button-container {
+    display: flex;
+    justify-content: flex-end;
     margin-top: 20px;
-    overflow: hidden;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    border : 1px solid #BEB5B5;
-    background-color: #ffffff;
 }
 
 .create-topic {
@@ -115,6 +113,14 @@ main {
     align-items: center;
 }
 
+.topic-container svg{
+    border-radius: 40px;
+}
+
 .topic-title {
     margin-left: 10px;
+}
+
+.nb-post-tab{
+    text-align: center;
 }

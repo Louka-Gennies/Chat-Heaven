@@ -31,13 +31,15 @@
             </div>
 
             <h2>Topics</h2>
+            <div class ="button-container">
+                <a href="/create-topic" class="create-topic"> + New Topic</a>
+            </div>
             <div class = "forum">
             <table>
                 <tr>
                     <th class="tab-forum">Forum</th>
                     <th class="nb-post">Posts</th>
                     <th class="last-post">Last Post</th>
-                    <th class ="create-topic-tab" style = "" ><a href="/create-topic" class="create-topic">+ New Topic</a></th>
                 </tr>
                 {{range .Topic}}
                 <tr>
@@ -65,8 +67,8 @@
                             <a href="posts?topic={{.Title}}" class="topic-title"><h3>{{.Title}}</h3></a>
                         </div>
                     </td>
-                    <td>{{.NbPosts}}</td>
-                    <td>Last Post</td>
+                    <td class = "nb-post-tab">{{.NbPosts}}</td>
+                    <td class = "last-post-tab">Last Post</td>
                 </tr>
                 {{end}}
             </table>

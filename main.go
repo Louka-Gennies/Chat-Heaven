@@ -34,6 +34,7 @@ type Post struct {
 	Topic    string
 	Likes    int
 	Dislikes int
+	NbComments int
 }
 
 type Comment struct {
@@ -641,6 +642,7 @@ func getPosts(topicTitle string, nbOfPosts ...int) []Post {
 		}
 		post.Likes = likeCount(post.ID)
 		post.Dislikes = dislikeCount(post.ID)
+		post.NbComments = len(getComment(post.Title))
 		posts = append(posts, post)
 	}
 	return posts

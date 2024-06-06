@@ -55,6 +55,10 @@ main {
     height: 150px;
 }
 
+.topics:hover {
+    background-color: #1ad98b;
+}
+
 .posts {
     display: flex;
     flex-direction: column;
@@ -71,6 +75,10 @@ main {
     border-radius: 20px;
     background-color: #963EFF;
     height: 150px;
+}
+
+.users:hover {
+    background-color: #8d2de3;
 }
 
 .text h3 {
@@ -154,6 +162,21 @@ main {
 
 .forum a:hover {
     color: #007BFF;
+}
+
+.forum-container {
+    display: flex;
+    align-items: center;
+}
+
+.forum-container a {
+    margin-left: 20px;
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.forum-container svg{
+    border-radius: 40px;
 }
 
 

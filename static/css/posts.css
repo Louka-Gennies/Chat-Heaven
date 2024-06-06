@@ -47,35 +47,40 @@ main {
     color: #000000;
     font-weight: 550;
     padding: 20px;
-    text-align: left;
     font-size: 24px;
 
 }
 
-.tab-forum {
+.tab-post {
+    text-align: left;
     border-collapse: collapse;
-    width: 50%;
+    width: 35%;
 }
 
-.nb-post {
+.author {
+    width: 35%;
+    text-align: left;
+}
+
+.post-likes {
     width: 10%;
 }
 
-.last-post {
-    width: 20%;
+.post-dislikes {
+    width: 10%;
 }
 
-.create-topic-table {
-    width: 50%;
+.post-comments{
+    width: 10%;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
     margin-top: 20px;
-    overflow: hidden;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    border : 1px solid #BEB5B5;
-    background-color: #ffffff;
 }
 
-.create-topic {
+.create-post {
     height: 15px;
     background-color: #33CCFF;
     padding: 10px 10px;
@@ -87,7 +92,7 @@ main {
     transition: background-color 0.3s;
 }
 
-.create-topic:hover {
+.create-post:hover {
     background-color: #0056b3;
 }
 
@@ -110,11 +115,23 @@ main {
     color: #007BFF;
 }
 
-.topic-container {
+.post-container {
     display: flex;
     align-items: center;
 }
 
-.topic-title {
+.post-title {
     margin-left: 10px;
+}
+
+.likes{
+    text-align: center;
+}
+
+.dislikes{
+    text-align: center;
+}
+
+.comments{
+    text-align: center;
 }

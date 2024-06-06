@@ -16,11 +16,20 @@ body {
     align-items: center;
 }
 
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    width: 70%;
+    margin-top: 20px;
+}
+
 .main {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 5%;
+    width: 70%;
+    flex-direction: column;
 }
 
 input[type="text"] {
@@ -37,9 +46,9 @@ input[type="text"] {
 }
 
 textarea {
-    width: 600px;
-    height: 150px; 
-    resize: none; 
+    width: 600px; /* Remplacez par la largeur que vous voulez */
+    height: 150px; /* Remplacez par la hauteur que vous voulez */
+    resize: none; /* Empêche l'utilisateur de redimensionner l'élément */
     margin-bottom: 20px;
 }
 
@@ -128,4 +137,6 @@ input[type="submit"] {
 .home-button {
     background: linear-gradient(0deg, #1EE592 0%, #1EE592 100%); /* Vert */
 }
+
+
   
