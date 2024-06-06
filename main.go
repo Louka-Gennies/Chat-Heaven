@@ -27,18 +27,23 @@ type Topic struct {
 }
 
 type Post struct {
-	ID       int
-	Title    string
-	Content  string
-	User     string
-	Topic    string
-	Likes    int
-	Dislikes int
+	ID                    int
+	Title                 string
+	Content               string
+	User                  string
+	Topic                 string
+	Likes                 int
+	Dislikes              int
+	NbComments            int
+	LikeDislikeDifference int
+	AlreadyLiked          bool
+	AlreadyDisliked       bool
 }
 
 type Comment struct {
-	Content string
-	User    string
+	Content   string
+	User      string
+	PostTitle string
 }
 
 func main() {
@@ -344,7 +349,6 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	tmpl, err := template.ParseFiles("templates/post.html")
 	if err != nil {
 		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
@@ -352,13 +356,13 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Topic string
-		Post  []Post
+		Topic          string
+		Post           []Post
 		Username       string
 		ProfilePicture string
 	}{
-		Topic: topic,
-		Post:  Posts,
+		Topic:          topic,
+		Post:           Posts,
 		Username:       username.(string),
 		ProfilePicture: profilePicture,
 	}
@@ -473,11 +477,11 @@ func topicsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Topic []Topic
+		Topic          []Topic
 		Username       string
 		ProfilePicture string
 	}{
-		Topic: Topics,
+		Topic:          Topics,
 		Username:       username.(string),
 		ProfilePicture: profilePicture,
 	}
@@ -641,6 +645,7 @@ func getPosts(topicTitle string, nbOfPosts ...int) []Post {
 		}
 		post.Likes = likeCount(post.ID)
 		post.Dislikes = dislikeCount(post.ID)
+		post.NbComments = len(getComment(post.Title))
 		posts = append(posts, post)
 	}
 	return posts
@@ -659,6 +664,7 @@ func getComment(title string) []Comment {
 		if err := rows.Scan(&comment.Content, &comment.User); err != nil {
 			return nil
 		}
+		comment.PostTitle = title
 		comments = append(comments, comment)
 	}
 	return comments
@@ -713,7 +719,6 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Message not specified", http.StatusBadRequest)
 		return
 	}
-	
 
 	var title, content, user, topic string
 	err = db.QueryRowContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE id = ?", postIDInt).Scan(&title, &content, &user, &topic)
@@ -740,22 +745,24 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Post    Post
-		Comment []Comment
+		Post           Post
+		Comment        []Comment
 		Username       string
 		ProfilePicture string
 	}{
 		Post: Post{
-			ID:       postIDInt,
-			Title:    title,
-			Content:  content,
-			User:     user,
-			Topic:    topic,
-			Likes:    likeCount(postIDInt),
-			Dislikes: dislikeCount(postIDInt),
-			
+			ID:                    postIDInt,
+			Title:                 title,
+			Content:               content,
+			User:                  user,
+			Topic:                 topic,
+			Likes:                 likeCount(postIDInt),
+			Dislikes:              dislikeCount(postIDInt),
+			LikeDislikeDifference: likeCount(postIDInt) - dislikeCount(postIDInt),
+			AlreadyLiked:          isLiked(username.(string), postIDInt),
+			AlreadyDisliked:       isDisliked(username.(string), postIDInt),
 		},
-		Comment: getComment(title),
+		Comment:        getComment(title),
 		Username:       username.(string),
 		ProfilePicture: profilePicture,
 	}
@@ -874,4 +881,22 @@ func addDislike(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("/post-content?postID=%d", postIDInt), http.StatusSeeOther)
+}
+
+func isLiked(username string, postID int) bool {
+	var existingLike int
+	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postID).Scan(&existingLike)
+	if err != nil {
+		return false
+	}
+	return existingLike > 0
+}
+
+func isDisliked(username string, postID int) bool {
+	var existingDislike int
+	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postID).Scan(&existingDislike)
+	if err != nil {
+		return false
+	}
+	return existingDislike > 0
 }

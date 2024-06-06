@@ -6,11 +6,14 @@
     <link rel="stylesheet" href="../static/css/create-topic.css">
     <link rel="stylesheet" href="../static/css/header.css">
     <link rel="stylesheet" href="../static/css/footer.css">
-    <link rel="stylesheet" href="../static/css/breadcrum.css">
+    <link rel="stylesheet" href="../static/css/breadcrumb.css">
 </head>
 <body>
     <header>
-        <div class="title"><a href="/"><span class="bold">Chat</span> Heaven</a></div>
+        <div class="logo">
+            <a href="/">
+            </a>
+        </div>
         <div class="search">
             <p>Search...</p>
             <svg width="30" height="30" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -34,9 +37,9 @@
 <div class= "main">
     <form action="/create-topic" method="post">
         <label for="title">Title:</label><br>
-        <input type="text" id="title" name="title"><br>
+        <input type="text" id="title" name="title" required><br>
         <label for="description">Description:</label><br>
-        <textarea id="description" name="description"></textarea><br>
+        <textarea id="description" name="description" required></textarea><br>
         <input type="submit" value="Submit">
     </form>
 </div>

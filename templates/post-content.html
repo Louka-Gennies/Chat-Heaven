@@ -4,11 +4,15 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="../static/css/header.css">
   <link rel="stylesheet" href="../static/css/footer.css">
-  <link rel="stylesheet" href="../static/css/breadcrum.css">
+  <link rel="stylesheet" href="../static/css/breadcrumb.css">
+    <link rel="stylesheet" href="../static/css/post-content.css">
   <title>{{.Post.Title}}</title>
 </head>
 <header>
-  <div class="title"><a href="/"><span class="bold">Chat</span> Heaven</a></div>
+    <div class="logo">
+        <a href="/">
+        </a>
+    </div>
   <div class="search">
       <p>Search...</p>
       <svg width="30" height="30" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,38 +29,108 @@
   {{end}}
 </header>
 <body>
-<div class="breadcrumb">
-    <a href="/">Main page</a> > <a href="/topics">Community</a> > <a href="/posts?topic={{.Post.Topic}}">{{.Post.Topic}}</a> > <span>{{.Post.Title}}</span>
-</div>
-<h1>{{.Post.Title}}</h1>
-<p>{{.Post.Content}}</p>
-<p>Likes : {{.Post.Likes}}</p>
-<form action="/like-post?postID={{.Post.ID}}" method="post">
-  <input type="submit" value="Like">
-</form>
-<p>Dislikes : {{.Post.Dislikes}}</p>
-<form action="/dislike-post?postID={{.Post.ID}}" method="post">
-  <input type="submit" value="Dislike">
-</form>
+<main>
+    <div class="breadcrumb">
+        <a href="/">Main page</a> > <a href="/topics">Community</a> > <a href="/posts?topic={{.Post.Topic}}">{{.Post.Topic}}</a> > <span>{{.Post.Title}}</span>
+    </div>
+    <div class = "post-container">
+        <div class = "post-info">
+            <div class = "title-post">
+                <h1>{{.Post.Title}}</h1>
+                <div class = "like-dislike">
+                    <div class ="like">
+                        <form id="likeForm" action="/like-post?postID={{.Post.ID}}" method="post">
+                            <button type="submit"class ="transparent-button">
+                                {{if .Post.AlreadyLiked}}
+                                <svg class ="svg-like-done" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#e8eaed">
+                                    <path d="M0 0h24v24H0V0z" fill="none"/>
+                                    <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
+                                </svg>
+                                {{else}}
+                                <svg class ="svg-like" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#e8eaed">
+                                    <path d="M0 0h24v24H0V0z" fill="none"/>
+                                    <path d="M13.11 5.72l-.57 2.89c-.12.59.04 1.2.42 1.66.38.46.94.73 1.54.73H20v1.08L17.43 18H9.34c-.18 0-.34-.16-.34-.34V9.82l4.11-4.1M14 2L7.59 8.41C7.21 8.79 7 9.3 7 9.83v7.83C7 18.95 8.05 20 9.34 20h8.1c.71 0 1.36-.37 1.72-.97l2.67-6.15c.11-.25.17-.52.17-.8V11c0-1.1-.9-2-2-2h-5.5l.92-4.65c.05-.22.02-.46-.08-.66-.23-.45-.52-.86-.88-1.22L14 2zM4 9H2v11h2c.55 0 1-.45 1-1v-9c0-.55-.45-1-1-1z"/>
+                                </svg>
+                                {{end}}
+                            </button>
+                        </form>
+                    </div>
+                    <p>{{.Post.LikeDislikeDifference}}</p>
+                    <div class ="dislike">
+                        <form id="dislikeForm" action="/dislike-post?postID={{.Post.ID}}" method="post">
+                            <button type="submit" class ="transparent-button">
+                                {{if .Post.AlreadyDisliked}}
+                                <svg class = "svg-dislike-done" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#e8eaed">
+                                    <path d="M24 24H0V0h24v24z" fill="none"/>
+                                    <path d="M22 4h-2c-.55 0-1 .45-1 1v9c0 .55.45 1 1 1h2V4zM2.17 11.12c-.11.25-.17.52-.17.8V13c0 1.1.9 2 2 2h5.5l-.92 4.65c-.05.22-.02.46.08.66.23.45.52.86.88 1.22L10 22l6.41-6.41c.38-.38.59-.89.59-1.42V6.34C17 5.05 15.95 4 14.66 4h-8.1c-.71 0-1.36.37-1.72.97l-2.67 6.15z"/>
+                                </svg>
+                                {{else}}
+                                <svg class = "svg-dislike" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#e8eaed" id="dislikeSvg" data-post-id="{{.Post.ID}}">
+                                    <path d="M24 24H0V0h24v24z" fill="none"/>
+                                    <path d="M10.89 18.28l.57-2.89c.12-.59-.04-1.2-.42-1.66-.38-.46-.94-.73-1.54-.73H4v-1.08L6.57 6h8.09c.18 0 .34.16.34.34v7.84l-4.11 4.1M10 22l6.41-6.41c.38-.38.59-.89.59-1.42V6.34C17 5.05 15.95 4 14.66 4h-8.1c-.71 0-1.36.37-1.72.97l-2.67 6.15c-.11.25-.17.52-.17.8V13c0 1.1.9 2 2 2h5.5l-.92 4.65c-.05.22-.02.46.08.66.23.45.52.86.88 1.22L10 22zm10-7h2V4h-2c-.55 0-1 .45-1 1v9c0 .55.45 1 1 1z"/>
+                                </svg>
+                                {{end}}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class = "author-date">
+                <p>by <a href = "#" class ="author">{{.Post.User}} </a> </p>
+                <p class ="date"> inserer ici la date</p>
+            </div>
+            <div class = "content">
+                <p>{{.Post.Content}}</p>
+            </div>
+        </div>
+    </div>
+    <form action="/post-content?postID={{.Post.ID}}" method="post" class ="post-comment">
+        <div id ="text-area-container">
+            <label for="content"></label>
+            <textarea name ="content" id="content" placeholder="Add a comment" required></textarea>
+        </div>
+        <input type="submit" value="Add a comment" class ="input-comment">
+    </form>
+    <div class ="comment-part">
+        {{range .Comment}}
+        <div class = "comment-container">
+            <div class = "comment-container-2">
+                <div class = "comment">
+                    <div class = "comment-title">
+                        <p>Re : {{.PostTitle}}</p>
+                    </div>
+                    <div class = "author-date">
+                        <p>by <a href = "#" class ="author">{{.User}}</a></p>
+                        <p class ="date"> inserer ici la date</p>
+                    </div>
+                    <div class = "content">
+                        <p>{{.Content}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
 
-<h2>Comments</h2>
-{{range .Comment}}
-<div>
-  <p>{{.Content}}</p>
-  <p>Post by {{.User}}</p>
-</div>
-{{end}}
+</main>
+<button id="back-to-top-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 20 20" height="40px" viewBox="0 0 20 20" width="40px" fill="#e8eaed">
+        <g>
+            <rect fill="none" height="20" width="20"/>
+        </g>
+        <g>
+            <g>
+                <polygon points="5,14.94 6.06,16 10,12.06 13.94,16 15,14.94 10,9.94"/>
+                <polygon points="5,9 6.06,10.06 10,6.12 13.94,10.06 15,9 10,4"/>
+            </g>
+        </g>
+    </svg>
+</button>
 
-<h2>Add a comment</h2>
-<form action="/post-content?postID={{.Post.ID}}" method="post">
-  <label for="content">Comment content:</label><br>
-  <textarea id="content" name="content" rows="4" cols="50"></textarea><br>
-  <input type="submit" value="Add a comment">
-</form>
-
-<a href="/posts?topic={{.Post.Topic}}">Back to posts</a>
 <div class="footer">
   <p>Chat Heaven©</p>
 </div>
 </body>
-</html>
+<script src="../static/js/comment.js"></script>
+<script src="../static/js/back-to-top-button.js"></script>
+</html> 

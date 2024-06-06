@@ -18,10 +18,18 @@ header a {
     color: black;
 }
 
-.title {
-    font-size: 35px;
-    font-weight: 500;
+.logo {
     margin-left: 2%;
+}
+
+.logo a {
+    display: inline-block;
+    width: 200px;
+    height: 75px;
+    background-image: url('../img/CHATHEAVEN_PNG.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
 }
 
 .bold {
