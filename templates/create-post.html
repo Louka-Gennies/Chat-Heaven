@@ -33,7 +33,7 @@
             <a href="/">Main page</a> > <a href="/topics">Topics</a> > <a href="/posts?topic={{.Topic}}">{{.Topic}}</a> > <span>Create Post</span>
         </div>
     </div>
-    <div class= "main"> 
+    <div class= "main">
         <form action="/create-post?topic={{.Topic}}" method="post" enctype="multipart/form-data">
             <label for="title">Title:</label><br>
             <input type="text" id="title" name="title" required><br>
