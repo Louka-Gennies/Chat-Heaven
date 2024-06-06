@@ -58,7 +58,10 @@ func main() {
         email TEXT NOT NULL UNIQUE,
         mot_de_passe TEXT NOT NULL,
         profile_picture TEXT,
-        user_likes INTEGER
+        user_likes INTEGER,
+		createdAt TEXT,
+		first_name TEXT,
+		last_name TEXT
     )`)
 	if err != nil {
 		log.Fatal(err)
@@ -140,6 +143,7 @@ func main() {
 	http.HandleFunc("/post-content", getPostContent)
 	http.HandleFunc("/like-post", addLike)
 	http.HandleFunc("/dislike-post", addDislike)
+	http.HandleFunc("/update-user", updateUser)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("Server started at :8080")
@@ -151,12 +155,30 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	username, ok := session.Values["username"]
 
 	if !ok {
+		data := struct {
+			Username       string
+			ProfilePicture string
+			NbPosts        int
+			NbTopics       int
+			NbUsers        int
+			Last4Topics    []Topic
+			IsLogged       bool
+		}{
+			Username:       "",
+			ProfilePicture: "",
+			NbPosts:        countPosts(),
+			NbTopics:       countTopics(),
+			NbUsers:        countUsers(),
+			Last4Topics:    getTopics(3),
+			IsLogged:       false,
+		}
+	
 		tmpl, err := template.ParseFiles("templates/home.html")
 		if err != nil {
 			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 			return
 		}
-		tmpl.Execute(w, nil)
+		tmpl.Execute(w, data)
 		return
 	}
 
@@ -174,6 +196,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		NbTopics       int
 		NbUsers        int
 		Last4Topics    []Topic
+		Islogged       bool
 	}{
 		Username:       username.(string),
 		ProfilePicture: profilePicture,
@@ -181,6 +204,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		NbTopics:       countTopics(),
 		NbUsers:        countUsers(),
 		Last4Topics:    getTopics(3),
+		Islogged:       true,
 	}
 
 	tmpl, err := template.ParseFiles("templates/home.html")
@@ -196,8 +220,9 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		email := r.FormValue("email")
 		password := r.FormValue("password")
+		date := time.Now().Format("02-01-2006")
 
-		err := addUser(username, email, password, "./static/uploads/blank-pfp.png")
+		err := addUser(username, email, password, "./static/uploads/blank-pfp.png", date)
 		if err != nil {
 			http.Error(w, "Error during registration", http.StatusInternalServerError)
 			return
@@ -249,9 +274,9 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
-		var email, profilePicture string
-		query := `SELECT email, profile_picture FROM users WHERE username = ?`
-		err := db.QueryRowContext(context.Background(), query, username).Scan(&email, &profilePicture)
+		var email, profilePicture, createdAt, first_name, last_name string
+		query := `SELECT email, profile_picture, first_name, last_name, createdAt FROM users WHERE username = ?`
+		err := db.QueryRowContext(context.Background(), query, username).Scan(&email, &profilePicture, &first_name, &last_name, &createdAt)
 		if err != nil {
 			http.Error(w, "User not found", http.StatusNotFound)
 			return
@@ -261,10 +286,16 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			Username       string
 			Email          string
 			ProfilePicture string
+			FirstName      string
+			LastName       string
+			CreatedAt 	   string
 		}{
 			Username:       username,
 			Email:          email,
 			ProfilePicture: profilePicture,
+			FirstName:      first_name,
+			LastName:       last_name,
+			CreatedAt: 	    createdAt,
 		}
 
 		tmpl, err := template.ParseFiles("templates/user.html")
@@ -303,6 +334,23 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func updateUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		username := r.URL.Query().Get("username")
+		firstName := r.FormValue("first_name")
+		lastName := r.FormValue("last_name")
+
+		updateSQL := `UPDATE users SET first_name = ?, last_name = ? WHERE username = ?`
+		_, err := db.ExecContext(context.Background(), updateSQL, firstName, lastName, username)
+		if err != nil {
+			http.Error(w, "Error updating the user", http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
+	}
+}
+
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	session.Options.MaxAge = -1
@@ -310,14 +358,14 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func addUser(username, email, motDePasse, profilePicture string) error {
+func addUser(username, email, motDePasse, profilePicture, date string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(motDePasse), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	_, err = db.ExecContext(context.Background(), `INSERT INTO users (username, email, mot_de_passe, profile_picture) VALUES (?, ?, ?, ?)`,
-		username, email, hashedPassword, profilePicture)
+	_, err = db.ExecContext(context.Background(), `INSERT INTO users (username, email, mot_de_passe, profile_picture, first_name, last_name, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		username, email, hashedPassword, profilePicture, "", "", date)
 	if err != nil {
 		return err
 	}
