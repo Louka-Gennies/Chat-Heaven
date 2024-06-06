@@ -48,3 +48,29 @@ body {
     margin-top: -20px;
     color: #857E7E;
 }
+
+#drop-zone {
+    display: flex;
+    width: 200px;
+    height: 200px;
+    padding: 20px;
+    border: 2px dashed #bbb;
+    border-radius: 20px;
+    text-align: center;
+    position: relative;
+    line-height: 50px;
+    font-size: 20px;
+    color: #bbb;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+#drop-zone input {
+    position: absolute;
+    cursor: pointer;
+    left: 0;
+    top: 0;
+    opacity: 0;
+}

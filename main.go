@@ -66,7 +66,7 @@ func main() {
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS topics (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		title TEXT NOT NULL,
+		title TEXT NOT NULL UNIQUE,
 		description TEXT NOT NULL,
 		picture TEXT,
 		user TEXT NOT NULL,
@@ -102,7 +102,7 @@ func main() {
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS posts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		title TEXT NOT NULL,
+		title TEXT NOT NULL UNIQUE,
 		content TEXT NOT NULL,
 		picture TEXT,
 		user TEXT NOT NULL,

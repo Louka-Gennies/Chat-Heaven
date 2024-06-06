@@ -16,9 +16,12 @@
         </div>
         <h1 class="username">{{.Username}}</h1>
         <p class="email">{{.Email}}</p>
-        <form action="/user?username={{.Username}}" method="POST" enctype="multipart/form-data">
-            <label for="profile_picture"></label>
-            <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+        <form action="/user?username={{.Username}}" method="POST" enctype="multipart/form-data" id="upload-form">
+            <div id="drop-zone">
+                <p id="text">Drag and drop a file here or click</p>
+                <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+                <img id="preview" src="" alt="Image preview" style="width:150px;height:150px;">
+            </div>
             <br>
             <input type="submit" value="Upload">
         </form>
@@ -29,5 +32,6 @@
             <input type="submit" value="Log out">
         </form>
     </div>
+    <script src="../static/js/dragAndDropImg.js"></script>
 </body>
 </html>
