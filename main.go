@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
@@ -70,8 +71,12 @@ func main() {
 		picture TEXT,
 		user TEXT NOT NULL,
 		topic_likes INTEGER,
+		date TEXT,
 		FOREIGN KEY (user) REFERENCES users(username)
 	)`)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS likes (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,14 +85,20 @@ func main() {
 		FOREIGN KEY (user) REFERENCES users(username),
 		FOREIGN KEY (title) REFERENCES posts(title)
 	)`)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS dislikes (
-    		id INTEGER PRIMARY KEY AUTOINCREMENT,
-    		user TEXT NOT NULL,
-    		title TEXT NOT NULL,
-    		FOREIGN KEY (user) REFERENCES users(username),
-    		FOREIGN KEY (title) REFERENCES posts(title)
-    	)`)
+    	id INTEGER PRIMARY KEY AUTOINCREMENT,
+    	user TEXT NOT NULL,
+    	title TEXT NOT NULL,
+    	FOREIGN KEY (user) REFERENCES users(username),
+    	FOREIGN KEY (title) REFERENCES posts(title)
+    )`)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS posts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,18 +107,23 @@ func main() {
 		picture TEXT,
 		user TEXT NOT NULL,
 		topic TEXT NOT NULL,
+		date TEXT,
 		FOREIGN KEY (user) REFERENCES users(username)
 		FOREIGN KEY (topic) REFERENCES topics(title)
 	)`)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS comments (
-    		id INTEGER PRIMARY KEY AUTOINCREMENT,
-    		content TEXT NOT NULL,
-    		user TEXT NOT NULL,
-    		post TEXT NOT NULL,
-    		FOREIGN KEY (user) REFERENCES users(username),
-    		FOREIGN KEY (post) REFERENCES posts(title)
-    	)`)
+    	id INTEGER PRIMARY KEY AUTOINCREMENT,
+    	content TEXT NOT NULL,
+    	user TEXT NOT NULL,
+    	post TEXT NOT NULL,
+		date TEXT,
+    	FOREIGN KEY (user) REFERENCES users(username),
+    	FOREIGN KEY (post) REFERENCES posts(title)
+    )`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -472,11 +488,13 @@ func createTopic(w http.ResponseWriter, r *http.Request) {
 
 		title, description := r.FormValue("title"), r.FormValue("description")
 
+		date := time.Now().Format("02-01-2006 15:04")
+
 		if !ok {
 			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
 			return
 		}
-		_, err := db.ExecContext(context.Background(), "INSERT INTO topics (user, title, description) VALUES (?, ?, ?)", username, title, description)
+		_, err := db.ExecContext(context.Background(), "INSERT INTO topics (user, title, description, date) VALUES (?, ?, ?, ?)", username, title, description, date)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(w, "Error posting the message", http.StatusInternalServerError)
@@ -660,11 +678,12 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 		session, _ := store.Get(r, "session")
 		username, ok := session.Values["username"]
 		comment := r.FormValue("content")
+		date := time.Now().Format("02-01-2006 15:04")
 		if !ok {
 			http.Error(w, "You must be logged in to comment on a message", http.StatusUnauthorized)
 			return
 		}
-		_, err := db.ExecContext(context.Background(), "INSERT INTO comments (user, content, post) VALUES (?, ?, ?)", username, comment, title)
+		_, err := db.ExecContext(context.Background(), "INSERT INTO comments (user, content, post, date) VALUES (?, ?, ?, ?)", username, comment, title, date)
 		if err != nil {
 			http.Error(w, "Error posting the comment", http.StatusInternalServerError)
 			return
@@ -719,9 +738,13 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 	var existingLike int
 	var existingDislike int
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
-	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
 	if err != nil {
 		http.Error(w, "Error checking the likes", http.StatusInternalServerError)
+		return
+	}
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
+	if err != nil {
+		http.Error(w, "Error checking the dislikes", http.StatusInternalServerError)
 		return
 	}
 
@@ -735,9 +758,13 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 	} else if existingDislike > 0 {
 		// If no like exists, add a new one
 		_, err = db.ExecContext(context.Background(), "INSERT INTO likes (user, title) VALUES (?, ?)", username, postIDInt)
-		_, err = db.ExecContext(context.Background(), "DELETE FROM dislikes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
 			http.Error(w, "Error adding the like", http.StatusInternalServerError)
+			return
+		}
+		_, err = db.ExecContext(context.Background(), "DELETE FROM dislikes WHERE user = ? AND title = ?", username, postIDInt)
+		if err != nil {
+			http.Error(w, "Error adding the dislike", http.StatusInternalServerError)
 			return
 		}
 	} else {
@@ -773,9 +800,13 @@ func addDislike(w http.ResponseWriter, r *http.Request) {
 	var existingDislike int
 	var existingLike int
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
-	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
 	if err != nil {
 		http.Error(w, "Error checking the dislikes", http.StatusInternalServerError)
+		return
+	}
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
+	if err != nil {
+		http.Error(w, "Error checking the likes", http.StatusInternalServerError)
 		return
 	}
 
@@ -789,9 +820,13 @@ func addDislike(w http.ResponseWriter, r *http.Request) {
 	} else if existingLike > 0 {
 		// If no dislike exists, add a new one
 		_, err = db.ExecContext(context.Background(), "INSERT INTO dislikes (user, title) VALUES (?, ?)", username, postIDInt)
-		_, err = db.ExecContext(context.Background(), "DELETE FROM likes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
 			http.Error(w, "Error adding the dislike", http.StatusInternalServerError)
+			return
+		}
+		_, err = db.ExecContext(context.Background(), "DELETE FROM likes WHERE user = ? AND title = ?", username, postIDInt)
+		if err != nil {
+			http.Error(w, "Error adding the like", http.StatusInternalServerError)
 			return
 		}
 	} else {
