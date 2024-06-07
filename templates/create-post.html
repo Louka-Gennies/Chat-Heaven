@@ -4,10 +4,15 @@
     <title>Post Submission</title>
     <link rel="stylesheet" href="../static/css/style.css">
     <link rel="stylesheet" href="../static/css/create-post.css">
+    <link rel="stylesheet" href="../static/css/header.css">
+    <link rel="stylesheet" href="../static/css/footer.css">
 </head>
 <body>
     <header>
-        <div class="title"><a href="/"><span class="bold">Chat</span> Heaven</a></div>
+        <div class="logo">
+            <a href="/">
+            </a>
+        </div>
         <div class="search">
             <p>Search...</p>
             <svg width="30" height="30" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -23,20 +28,29 @@
         <div class="login"><a href="/login">Login</a></div>
         {{end}}
     </header>
-    <div class= "main"> 
-        <form action="/create-post" method="post" enctype="multipart/form-data">
+    <div class="navigation">
+        <div class="breadcrumb">
+            <a href="/">Main page</a> > <a href="/topics">Topics</a> > <a href="/posts?topic={{.Topic}}">{{.Topic}}</a> > <span>Create Post</span>
+        </div>
+    </div>
+    <div class= "main">
+        <form action="/create-post?topic={{.Topic}}" method="post" enctype="multipart/form-data">
             <label for="title">Title:</label><br>
-            <input type="text" id="title" name="title"><br>
+            <input type="text" id="title" name="title" required><br>
             <label for="content">Content:</label><br>
-            <textarea id="content" name="content"></textarea><br>
-            <input type="file" id="image" name="image"><br>
+            <textarea id="content" name="content"required></textarea><br>
+            <input type="file" id="image" name="image" ><br>
             <input type="submit" value="Submit">
         </form>
     </div>
     <div class="link-container">
-        <button class="button-link return-button" onclick="location.href='/post'">Return</button>
+        <button class="button-link return-button" onclick="location.href='/posts?topic={{.Topic}}'">Return</button>
         <button class="button-link home-button" onclick="location.href='/'">Home</button>
     </div>
 </div>
+<div class="footer">
+    <p>Chat Heaven©</p>
+</div>
 </body>
+
 </html>
