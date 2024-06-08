@@ -360,7 +360,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	var profilePicture string
 	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
 	if err != nil {
-		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
+		http.Error(w, "Error retrieving the profile picture: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -383,6 +383,26 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
+		file, handler, err := r.FormFile("post_picture")
+		if err != nil {
+			http.Error(w, "Error retrieving image", http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+
+		os.MkdirAll("static/uploads", os.ModePerm)
+
+		filePath := filepath.Join("static/uploads", handler.Filename)
+
+		f, err := os.Create(filePath)
+		if err != nil {
+			http.Error(w, "Error saving file", http.StatusInternalServerError)
+			return
+		}
+		defer f.Close()
+
+		io.Copy(f, file)
+
 		session, _ := store.Get(r, "session")
 		username, ok := session.Values["username"]
 		title, content, topicTitle := r.FormValue("title"), r.FormValue("content"), r.FormValue("topic")
@@ -391,7 +411,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
 			return
 		}
-		_, err := db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic) VALUES (?, ?, ?, ?)", username, title, content, topicTitle)
+		_, err = db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic, picture) VALUES (?, ?, ?, ?, ?)", username, title, content, topicTitle, filePath)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(w, "Error posting the message", http.StatusInternalServerError)
@@ -401,7 +421,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, fmt.Sprintf("/posts?topic=%s", topic), http.StatusSeeOther)
 
 	}
-
+	
 	tmpl.Execute(w, data)
 }
 
@@ -634,6 +654,17 @@ func dislikeCount(postID int) int {
 		return 0
 	}
 	return count
+
+}
+func displayPostPicture(w http.ResponseWriter, r *http.Request) {
+	postID := r.URL.Query().Get("id")
+
+	var postPicture string
+	err := db.QueryRowContext(context.Background(), `SELECT post_picture FROM posts WHERE post_id = ?`, postID).Scan(&postPicture)
+	if err != nil {
+		http.Error(w, "Error retrieving the post picture", http.StatusInternalServerError)
+		return
+	}
 
 }
 

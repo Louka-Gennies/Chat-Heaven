@@ -24,12 +24,12 @@
         {{end}}
     </header>
     <div class= "main"> 
-        <form action="/create-post" method="post" enctype="multipart/form-data">
+        <form action="/create-post" method="POST" enctype="multipart/form-data">
             <label for="title">Title:</label><br>
             <input type="text" id="title" name="title"><br>
             <label for="content">Content:</label><br>
             <textarea id="content" name="content"></textarea><br>
-            <input type="file" id="image" name="image"><br>
+            <input type="file" id="post_picture" name="post_picture">
             <input type="submit" value="Submit">
         </form>
     </div>
