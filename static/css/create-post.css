@@ -88,6 +88,7 @@ input[type="submit"] {
     display: flex;
     justify-content: center; /* Changez cette ligne */
     margin-top: 50px;
+
 }
 
   .button-link {
@@ -137,6 +138,13 @@ input[type="submit"] {
 .home-button {
     background: linear-gradient(0deg, #1EE592 0%, #1EE592 100%); /* Vert */
 }
+#emoji-picker {
+    z-index: 1000;
+}
 
-
+emoji-picker {
+  width: 100%;
+  max-width: 400px;
+  margin: 20px auto;
+}
   
