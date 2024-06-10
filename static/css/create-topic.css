@@ -139,4 +139,21 @@ input[type="submit"] {
 }
 
 
-  
+#emoji-picker {
+  z-index: 1000;
+  position: absolute;
+  bottom: -200px;
+  right: -420px;
+}
+
+emoji-picker {
+  --background: rgba(255, 255, 255, 0.9);
+}
+.emoji-button {
+  border: none;
+  background-color: transparent;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-bottom: 25px;
+}

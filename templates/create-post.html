@@ -44,10 +44,12 @@
     </div>
     <div class="main">
         <form action="/create-post?topic={{.Topic}}" method="post" enctype="multipart/form-data">
-            <label for="title">Title:</label><br>
-            <input type="text" id="title" name="title" required><br>
-            <label for="content">Content:</label><br>
-            <textarea id="content" name="content" required></textarea><br>
+            <div class="form-title">
+                <label for="title">Title:</label><br>
+                <input type="text" id="title" name="title" required><br>
+                <label for="content">Content:</label><br>
+                <textarea id="content" name="content" required></textarea><br>
+            </div>
             <div id="emoji-container" style="position: relative;">
                 <button class="emoji-button" type="button" id="emoji-button">😊</button>
                 <emoji-picker id="emoji-picker" style="display: none; position: absolute;"></emoji-picker>
