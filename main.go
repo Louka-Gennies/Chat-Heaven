@@ -477,12 +477,13 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		session, _ := store.Get(r, "session")
 		username, ok := session.Values["username"]
 		title, content, topicTitle := r.FormValue("title"), r.FormValue("content"), r.FormValue("topic")
+		date := time.Now().Format("02-01-2006 15:04")
 
 		if !ok {
 			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
 			return
 		}
-		_, err := db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic) VALUES (?, ?, ?, ?)", username, title, content, topicTitle)
+		_, err := db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic, date) VALUES (?, ?, ?, ?, ?)", username, title, content, topicTitle, date)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(w, "Error posting the message", http.StatusInternalServerError)
