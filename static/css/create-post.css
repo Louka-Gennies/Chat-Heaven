@@ -28,6 +28,7 @@ body {
     justify-content: center;
     align-items: center;
     margin-top: 5%;
+    margin-bottom: 80px;
     width: 70%;
     flex-direction: column;
 }
@@ -40,21 +41,22 @@ input[type="text"] {
     padding: 0 20px;
     font-size: 25px;
     font-weight: 500;
-    color: #857E7E;
-    background-color: rgb(209, 206, 206); 
+    color: #c1c0c0;
+    background-color: rgb(231, 229, 229); 
     margin-bottom: 20px;
 }
 
 textarea {
-    width: 600px; /* Remplacez par la largeur que vous voulez */
-    height: 150px; /* Remplacez par la hauteur que vous voulez */
-    resize: none; /* Empêche l'utilisateur de redimensionner l'élément */
-    margin-bottom: 20px;
+    width: 600px; 
+    height: 150px; 
+    resize: none; 
+    margin-bottom: 5px;
 }
 
-input[type="submit"] {
+.submit-button {
     display: block;
     margin: auto;
+    margin-top: 30px;
     padding: 17px 40px;
     border-radius: 50px;
     cursor: pointer;
@@ -86,8 +88,8 @@ input[type="submit"] {
 
   .link-container {
     display: flex;
-    justify-content: center; /* Changez cette ligne */
-    margin-top: 50px;
+    justify-content: center;
+    margin-top: -20px;
 }
 
   .button-link {
@@ -131,12 +133,78 @@ input[type="submit"] {
   }
 
   .return-button {
-    background: linear-gradient(0deg, #BB61F3 0%, #BB61F3 100%); /* Rouge */
+    background: linear-gradient(0deg, #BB61F3 0%, #BB61F3 100%); 
 }
 
 .home-button {
-    background: linear-gradient(0deg, #1EE592 0%, #1EE592 100%); /* Vert */
+    background: linear-gradient(0deg, #1EE592 0%, #1EE592 100%); 
 }
 
+.textarea-container {
+  position: relative;
+}
 
-  
+#emoji-picker {
+  z-index: 1000;
+  position: absolute;
+  bottom: -200px;
+  right: -420px;
+}
+
+emoji-picker {
+  --background: rgba(255, 255, 255, 0.9);
+}
+.emoji-button {
+  border: none;
+  background-color: transparent;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-bottom: 15px;
+}
+
+.image-button {
+  align-items: center;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: .25rem;
+  box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+  box-sizing: border-box;
+  color: rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  justify-content: center;
+  line-height: 1.25;
+  min-height: 3rem;
+  padding: calc(.875rem - 1px) calc(1.5rem - 1px);
+  text-decoration: none;
+  transition: all 250ms;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: baseline;
+  width: auto;
+  margin-top: -100px;
+ }
+ 
+ .image-button:hover,
+ .image-button:focus {
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+  color: rgba(0, 0, 0, 0.65);
+ }
+ 
+ .image-button:hover {
+  transform: translateY(-1px);
+ }
+ 
+ .image-button:active {
+  background-color: #F0F0F1;
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: rgba(0, 0, 0, 0.06) 0 2px 4px;
+  color: rgba(0, 0, 0, 0.65);
+  transform: translateY(0);
+ }

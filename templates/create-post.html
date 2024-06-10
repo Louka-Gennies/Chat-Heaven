@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post Submission</title>
     <link rel="stylesheet" href="../static/css/style.css">
     <link rel="stylesheet" href="../static/css/create-post.css">
     <link rel="stylesheet" href="../static/css/header.css">
     <link rel="stylesheet" href="../static/css/footer.css">
+    <style>
+        emoji-picker {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -22,7 +31,7 @@
         {{if .}}
         <div class="pfp">
             <a href="/user?username={{.Username}}" class="username">{{.Username}}</a>
-            <a href="/user?username={{.Username}}" class="profile"><img src="{{.ProfilePicture}}" alt="Photo de profil" href="/user?username={{.Username}}" ></a>
+            <a href="/user?username={{.Username}}" class="profile"><img src="{{.ProfilePicture}}" alt="Photo de profil"></a>
         </div>
         {{else}}
         <div class="login"><a href="/login">Login</a></div>
@@ -30,27 +39,70 @@
     </header>
     <div class="navigation">
         <div class="breadcrumb">
-            <a href="/">Main page</a> > <a href="/topics">Topics</a> > <a href="/posts?topic={{.Topic}}">{{.Topic}}</a> > <span>Create Post</span>
+            <a href="/">Main page</a> &gt; <a href="/topics">Topics</a> &gt; <a href="/posts?topic={{.Topic}}">{{.Topic}}</a> &gt; <span>Create Post</span>
         </div>
     </div>
-    <div class= "main">
+    <div class="main">
         <form action="/create-post?topic={{.Topic}}" method="post" enctype="multipart/form-data">
             <label for="title">Title:</label><br>
             <input type="text" id="title" name="title" required><br>
             <label for="content">Content:</label><br>
-            <textarea id="content" name="content"required></textarea><br>
-            <input type="file" id="image" name="image" ><br>
-            <input type="submit" value="Submit">
+            <textarea id="content" name="content" required></textarea><br>
+            <div id="emoji-container" style="position: relative;">
+                <button class="emoji-button" type="button" id="emoji-button">😊</button>
+                <emoji-picker id="emoji-picker" style="display: none; position: absolute;"></emoji-picker>
+            </div>
+            <input type="file" id="upload-button" name="image" style="display: none;"><br>
+            <button class="image-button" id="upload-button" type="button">Upload Image</button>
+            <input class="submit-button" type="submit" value="Submit">
         </form>
     </div>
     <div class="link-container">
         <button class="button-link return-button" onclick="location.href='/posts?topic={{.Topic}}'">Return</button>
         <button class="button-link home-button" onclick="location.href='/'">Home</button>
     </div>
-</div>
-<div class="footer">
-    <p>Chat Heaven©</p>
-</div>
-</body>
+    <div class="footer">
+        <p>Chat Heaven©</p>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@latest/index.min.js" type="module"></script>
+    <script>
+        let currentActiveElement = null;
+    
+        document.querySelectorAll('input, textarea').forEach(element => {
+            element.addEventListener('focus', () => {
+                currentActiveElement = element;
+            });
+        });
+    
+        document.querySelector('#emoji-button').addEventListener('click', () => {
+            const emojiPicker = document.querySelector('#emoji-picker');
+            if (emojiPicker.style.display === 'none') {
+                emojiPicker.style.display = 'block';
+            } else {
+                emojiPicker.style.display = 'none';
+            }
+        });
+    
+        document.querySelector('#emoji-picker')
+            .addEventListener('emoji-click', event => {
+                if (currentActiveElement) {
+                    const start = currentActiveElement.selectionStart;
+                    const end = currentActiveElement.selectionEnd;
+                    currentActiveElement.value = currentActiveElement.value.substring(0, start) + event.detail.unicode + currentActiveElement.value.substring(end);
+                    currentActiveElement.selectionStart = currentActiveElement.selectionEnd = start + event.detail.unicode.length;
+                }
+            });
+        document.addEventListener('click', event => {
+            const emojiPicker = document.querySelector('#emoji-picker');
+            const emojiButton = document.querySelector('#emoji-button');
+            if (!emojiPicker.contains(event.target) && !emojiButton.contains(event.target) && emojiPicker.style.display === 'block') {
+                emojiPicker.style.display = 'none';
+            }
+        });
 
+        document.querySelector('.image-button').addEventListener('click', () => {
+        document.querySelector('#upload-button').click();
+    });
+    </script>
+</body>
 </html>
