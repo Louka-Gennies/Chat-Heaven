@@ -185,39 +185,39 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		tmpl.Execute(w, data)
 		return
+	} else if ok {
+		var profilePicture string
+		err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+		if err != nil {
+			http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
+			return
+		}
+	
+		data := struct {
+			Username       string
+			ProfilePicture string
+			NbPosts        int
+			NbTopics       int
+			NbUsers        int
+			Last4Topics    []Topic
+			Islogged       bool
+		}{
+			Username:       username.(string),
+			ProfilePicture: profilePicture,
+			NbPosts:        countPosts(),
+			NbTopics:       countTopics(),
+			NbUsers:        countUsers(),
+			Last4Topics:    getTopics(3),
+			Islogged:       true,
+		}
+	
+		tmpl, err := template.ParseFiles("templates/home.html")
+		if err != nil {
+			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, data)
 	}
-
-	var profilePicture string
-	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
-	if err != nil {
-		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
-		return
-	}
-
-	data := struct {
-		Username       string
-		ProfilePicture string
-		NbPosts        int
-		NbTopics       int
-		NbUsers        int
-		Last4Topics    []Topic
-		Islogged       bool
-	}{
-		Username:       username.(string),
-		ProfilePicture: profilePicture,
-		NbPosts:        countPosts(),
-		NbTopics:       countTopics(),
-		NbUsers:        countUsers(),
-		Last4Topics:    getTopics(3),
-		Islogged:       true,
-	}
-
-	tmpl, err := template.ParseFiles("templates/home.html")
-	if err != nil {
-		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, data)
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
