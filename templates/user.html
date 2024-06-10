@@ -57,13 +57,29 @@
             </div>
 
             <div id="Tab2" class="tabcontent">
-                <h3>Tab2</h3>
-                <p>Tab2 content...</p>
+                <h3>Posts</h3>
+                {{range .Posts}}
+                <div class="post">
+                    <h4>{{.Title}}</h4>
+                    <p>{{.Content}}</p>
+                    <form action="/delete-post?post={{$.Title}}" method="POST">
+                        <input type="submit" value="Delete">
+                    </form>
+                </div>
+                {{end}}
             </div>
 
             <div id="Tab3" class="tabcontent">
-                <h3>Tab3</h3>
-                <p>Tab3 content...</p>
+                <h3>Topics</h3>
+                {{range .Topics}}
+                <div class="topic">
+                    <h4>{{.Title}}</h4>
+                    <p>{{.Description}}</p>
+                    <form action="/delete-topic?topic  ={{$.Title}}" method="POST">
+                        <input type="submit" value="Delete">
+                    </form>
+                </div>
+                {{end}}
             </div>
         </div>
     </main>

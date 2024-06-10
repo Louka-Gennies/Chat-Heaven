@@ -149,6 +149,8 @@ func main() {
 	http.HandleFunc("/like-post", addLike)
 	http.HandleFunc("/dislike-post", addDislike)
 	http.HandleFunc("/update-user", updateUser)
+	http.HandleFunc("/delete-post", deletePost)
+	http.HandleFunc("/delete-topic", deleteTopic)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("Server started at :8080")
@@ -299,6 +301,8 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			FirstName      string
 			LastName       string
 			CreatedAt 	   string
+			Posts		  []Post
+			Topics		  []Topic
 		}{
 			Username:       username,
 			Email:          email,
@@ -306,10 +310,15 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			FirstName:      first_name,
 			LastName:       last_name,
 			CreatedAt: 	    createdAt,
+			Posts:          getPostsByUser(username),
+			Topics:         getTopicByUser(username),
 		}
+
+		fmt.Println(data)
 
 		tmpl, err := template.ParseFiles("templates/user.html")
 		if err != nil {
+			fmt.Println(err)
 			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 			return
 		}
@@ -723,6 +732,42 @@ func getPosts(topicTitle string, nbOfPosts ...int) []Post {
 	return posts
 }
 
+func getTopicByUser(username string) []Topic {
+	rows, err := db.QueryContext(context.Background(), "SELECT title, description FROM topics WHERE user = ?", username)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	var topics []Topic
+	for rows.Next() {
+		var topic Topic
+		if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
+			return nil
+		}
+		topics = append(topics, topic)
+	}
+	return topics
+}
+
+func getPostsByUser(username string) []Post {
+	rows, err := db.QueryContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE user = ?", username)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		if err := rows.Scan(&post.Title, &post.Content, &post.User, &post.Topic); err != nil {
+			return nil
+		}
+		posts = append(posts, post)
+	}
+	return posts
+}
+
 func getComment(title string) []Comment {
 	rows, err := db.QueryContext(context.Background(), "SELECT content, user FROM comments WHERE post = ?", title)
 	if err != nil {
@@ -765,6 +810,10 @@ func dislikeCount(postID int) int {
 func getPostContent(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
+	if err != nil {
+		http.Error(w, "Error converting the post ID", http.StatusInternalServerError)
+		return
+	}
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
@@ -782,10 +831,6 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
 		return
-	}
-	if err != nil {
-		// handle error
-		fmt.Println(err)
 	}
 	if postID == "" {
 		http.Error(w, "Message not specified", http.StatusBadRequest)
@@ -988,4 +1033,36 @@ func isDisliked(username string, postID int) bool {
 		return false
 	}
 	return existingDislike > 0
+}
+
+func deletePost(w http.ResponseWriter, r *http.Request) {
+	postTitle := r.URL.Query().Get("post")
+	if postTitle == "" {
+		http.Error(w, "Post not specified", http.StatusBadRequest)
+		return
+	}
+
+	_, err := db.ExecContext(context.Background(), "DELETE FROM posts WHERE title = ?", postTitle)
+	if err != nil {
+		http.Error(w, "Error deleting the post", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func deleteTopic(w http.ResponseWriter, r *http.Request) {
+	topicTitle := r.URL.Query().Get("topic")
+	if topicTitle == "" {
+		http.Error(w, "Topic not specified", http.StatusBadRequest)
+		return
+	}
+
+	_, err := db.ExecContext(context.Background(), "DELETE FROM topics WHERE title = ?", topicTitle)
+	if err != nil {
+		http.Error(w, "Error deleting the topic", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
