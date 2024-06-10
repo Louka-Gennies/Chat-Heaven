@@ -24,7 +24,9 @@
         {{if .IsLogged}}
         <div class="pfp">
             <a href="/user?username={{.Username}}" class="username">{{.Username}}</a>
-            <a href="/user?username={{.Username}}" class="profile"><img src="{{.ProfilePicture}}" alt="Photo de profil" href="/user?username={{.Username}}" ></a>
+            <a href="/user?username={{.Username}}" class="profile">
+                <img src="{{.ProfilePicture}}" alt="Photo de profil" href="/user?username={{.Username}}" >
+            </a>
         </div>
         {{else}}
         <div class="login"><a href="/login">Login</a></div>

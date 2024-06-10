@@ -156,7 +156,12 @@ func main() {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session")
+	session, err := store.Get(r, "session")
+	if err != nil {
+    http.Error(w, "Error retrieving session", http.StatusInternalServerError)
+    return
+    }
+
 	username, ok := session.Values["username"]
 
 	if !ok {
@@ -200,7 +205,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			NbTopics       int
 			NbUsers        int
 			Last4Topics    []Topic
-			Islogged       bool
+			IsLogged       bool
 		}{
 			Username:       username.(string),
 			ProfilePicture: profilePicture,
@@ -208,7 +213,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			NbTopics:       countTopics(),
 			NbUsers:        countUsers(),
 			Last4Topics:    getTopics(3),
-			Islogged:       true,
+			IsLogged:       true,
 		}
 	
 		tmpl, err := template.ParseFiles("templates/home.html")
