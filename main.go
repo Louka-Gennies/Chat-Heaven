@@ -25,6 +25,7 @@ type Topic struct {
 	Title       string
 	Description string
 	NbPosts     int
+	User 	    string
 }
 
 type Post struct {
@@ -728,7 +729,7 @@ func getPosts(topicTitle string, nbOfPosts ...int) []Post {
 }
 
 func getTopicByUser(username string) []Topic {
-	rows, err := db.QueryContext(context.Background(), "SELECT title, description FROM topics WHERE user = ?", username)
+	rows, err := db.QueryContext(context.Background(), "SELECT title, description, user FROM topics WHERE user = ?", username)
 	if err != nil {
 		return nil
 	}
@@ -737,7 +738,7 @@ func getTopicByUser(username string) []Topic {
 	var topics []Topic
 	for rows.Next() {
 		var topic Topic
-		if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
+		if err := rows.Scan(&topic.Title, &topic.Description, &topic.User); err != nil {
 			return nil
 		}
 		topics = append(topics, topic)
@@ -746,7 +747,7 @@ func getTopicByUser(username string) []Topic {
 }
 
 func getPostsByUser(username string) []Post {
-	rows, err := db.QueryContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE user = ?", username)
+	rows, err := db.QueryContext(context.Background(), "SELECT id, title, content, user, topic FROM posts WHERE user = ?", username)
 	if err != nil {
 		return nil
 	}
@@ -755,7 +756,7 @@ func getPostsByUser(username string) []Post {
 	var posts []Post
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.Title, &post.Content, &post.User, &post.Topic); err != nil {
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.User, &post.Topic); err != nil {
 			return nil
 		}
 		posts = append(posts, post)
@@ -1041,7 +1042,10 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	username := r.URL.Query().Get("user")
+
+
+	http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
 }
 
 func deleteTopic(w http.ResponseWriter, r *http.Request) {
@@ -1057,5 +1061,7 @@ func deleteTopic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	username := r.URL.Query().Get("user")
+
+	http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
 }
