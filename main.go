@@ -314,11 +314,8 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			Topics:         getTopicByUser(username),
 		}
 
-		fmt.Println(data)
-
 		tmpl, err := template.ParseFiles("templates/user.html")
 		if err != nil {
-			fmt.Println(err)
 			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 			return
 		}
@@ -499,7 +496,6 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err := db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic, date) VALUES (?, ?, ?, ?, ?)", username, title, content, topicTitle, date)
 		if err != nil {
-			fmt.Println(err)
 			http.Error(w, "Error posting the message", http.StatusInternalServerError)
 			return
 		}
@@ -610,7 +606,6 @@ func createTopic(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err := db.ExecContext(context.Background(), "INSERT INTO topics (user, title, description, date) VALUES (?, ?, ?, ?)", username, title, description, date)
 		if err != nil {
-			fmt.Println(err)
 			http.Error(w, "Error posting the message", http.StatusInternalServerError)
 			return
 		}
@@ -897,7 +892,6 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
-		// handle error
 		fmt.Println(err)
 	}
 	if postID == "" {
@@ -959,7 +953,6 @@ func addDislike(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
-		// handle error
 		fmt.Println(err)
 	}
 	if postID == "" {
