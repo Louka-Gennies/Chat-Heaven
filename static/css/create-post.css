@@ -195,6 +195,7 @@ emoji-picker {
   touch-action: manipulation;
   vertical-align: baseline;
   width: auto;
+  margin-right: 9%;
 
  }
  
@@ -217,9 +218,17 @@ emoji-picker {
   transform: translateY(0);
  }
 
- .image-preview-container {
+ .picture-preview {
+  display: block; 
+  width: 100px; 
+  height: 100px; 
+  min-width: 100px; 
+  object-fit: cover; 
+}
+
+
+.flex-container {
   display: flex;
-  align-items: flex-start; /* Aligns the items vertically at the top */
-  gap: 10px; /* Space between the items */
-  flex-wrap: wrap; /* Allows the items to wrap onto multiple lines */
+  align-items: center; 
+  gap: 10px; 
 }
