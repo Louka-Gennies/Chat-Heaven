@@ -105,10 +105,8 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func addUser(username, email, motDePasse, profilePicture, date string) error {
-	openDB()
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(motDePasse), bcrypt.DefaultCost)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -122,7 +120,6 @@ func addUser(username, email, motDePasse, profilePicture, date string) error {
 }
 
 func verifyUser(username, motDePasse string) error {
-	openDB()
 	var motDePasseDB string
 	err := db.QueryRowContext(context.Background(), "SELECT mot_de_passe FROM users WHERE username = ?", username).Scan(&motDePasseDB)
 	if err != nil {

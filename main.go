@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"fmt"
 
 	_ "modernc.org/sqlite"
 
@@ -53,6 +52,21 @@ func main() {
 		log.Fatal(err)
 	}
 
+	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS posts (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		title TEXT NOT NULL UNIQUE,
+		content TEXT NOT NULL,
+		picture TEXT,
+		user TEXT NOT NULL,
+		topic TEXT NOT NULL,
+		date TEXT,
+		FOREIGN KEY (user) REFERENCES users(username)
+		FOREIGN KEY (topic) REFERENCES topics(title)
+	)`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS likes (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user TEXT NOT NULL,
@@ -75,21 +89,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS posts (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		title TEXT NOT NULL UNIQUE,
-		content TEXT NOT NULL,
-		picture TEXT,
-		user TEXT NOT NULL,
-		topic TEXT NOT NULL,
-		date TEXT,
-		FOREIGN KEY (user) REFERENCES users(username)
-		FOREIGN KEY (topic) REFERENCES topics(title)
-	)`)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	_, err = db.ExecContext(context.Background(), `CREATE TABLE IF NOT EXISTS comments (
     	id INTEGER PRIMARY KEY AUTOINCREMENT,
     	content TEXT NOT NULL,
@@ -102,24 +101,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='table';")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer rows.Close()
-
-for rows.Next() {
-    var name string
-    if err := rows.Scan(&name); err != nil {
-        log.Fatal(err)
-    }
-    fmt.Println(name)
-}
-
-if err := rows.Err(); err != nil {
-    log.Fatal(err)
-}
 
 	http.HandleFunc("/", chatHeaven.HomeHandler)
 	http.HandleFunc("/register", chatHeaven.RegisterHandler)

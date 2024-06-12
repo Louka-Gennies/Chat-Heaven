@@ -5,7 +5,6 @@ import(
 )
 
 func countPosts() int {
-	openDB()
 	var count int
 	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM posts").Scan(&count)
 	if err != nil {
@@ -15,7 +14,6 @@ func countPosts() int {
 }
 
 func countTopics() int {
-	openDB()
 	var count int
 	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM topics").Scan(&count)
 	if err != nil {
@@ -25,7 +23,6 @@ func countTopics() int {
 }
 
 func countUsers() int {
-	openDB()
 	var count int
 	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM users").Scan(&count)
 	if err != nil {
@@ -35,7 +32,6 @@ func countUsers() int {
 }
 
 func likeCount(postID int) int {
-	openDB()
 	var count int
 	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE title = ?", postID).Scan(&count)
 	if err != nil {
@@ -45,7 +41,6 @@ func likeCount(postID int) int {
 }
 
 func dislikeCount(postID int) int {
-	openDB()
 	var count int
 	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE title = ?", postID).Scan(&count)
 	if err != nil {
