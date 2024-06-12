@@ -43,6 +43,7 @@ type Post struct {
 	AlreadyLiked          bool
 	AlreadyDisliked       bool
 	Date                  string
+	Picture               string
 }
 
 type Comment struct {
@@ -467,7 +468,6 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
-
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
@@ -511,12 +511,32 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		title, content, topicTitle := r.FormValue("title"), r.FormValue("content"), r.FormValue("topic")
 		date := time.Now().Format("02-01-2006 15:04")
 
+		file, handler, err := r.FormFile("picture")
+		if err != nil {
+			fmt.Print(err)
+			http.Error(w, "Error during file upload", http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+
+		os.MkdirAll("static/uploads", os.ModePerm)
+
+		filePath := filepath.Join("static/uploads", handler.Filename)
+		f, err := os.Create(filePath)
+		if err != nil {
+			http.Error(w, "Error saving the file", http.StatusInternalServerError)
+			return
+		}
+		defer f.Close()
+		io.Copy(f, file)
+
 		if !ok {
 			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
 			return
 		}
-		_, err := db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic, date) VALUES (?, ?, ?, ?, ?)", username, title, content, topicTitle, date)
+		_, err = db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic, date) VALUES (?, ?, ?, ?, ?)", username, title, content, topicTitle, date)
 		if err != nil {
+			fmt.Println(err)
 			http.Error(w, "Error posting the message", http.StatusInternalServerError)
 			return
 		}
@@ -863,8 +883,9 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var title, content, user, topic string
-	err = db.QueryRowContext(context.Background(), "SELECT title, content, user, topic FROM posts WHERE id = ?", postIDInt).Scan(&title, &content, &user, &topic)
+	var title, content, user, topic, picture string
+	err = db.QueryRowContext(context.Background(), "SELECT title, content, user, topic, picture FROM posts WHERE id = ?", postIDInt).Scan(&title, &content, &user, &topic, &picture)
+
 	if err != nil {
 		http.Error(w, "Message not found", http.StatusNotFound)
 		return
@@ -906,11 +927,14 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 			AlreadyLiked:          isLiked(username.(string), postIDInt),
 			AlreadyDisliked:       isDisliked(username.(string), postIDInt),
 			Date:                  getDatePost(postIDInt),
+			Picture:               picture,
 		},
 		Comment:        getComment(title),
 		Username:       username.(string),
 		ProfilePicture: profilePicture,
 	}
+
+	fmt.Print(data.Post.Picture)
 
 	tmpl, err := template.ParseFiles("templates/post-content.html")
 	if err != nil {
