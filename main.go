@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"fmt"
 
 	_ "modernc.org/sqlite"
 
@@ -101,6 +102,24 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='table';")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer rows.Close()
+
+for rows.Next() {
+    var name string
+    if err := rows.Scan(&name); err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(name)
+}
+
+if err := rows.Err(); err != nil {
+    log.Fatal(err)
+}
 
 	http.HandleFunc("/", chatHeaven.HomeHandler)
 	http.HandleFunc("/register", chatHeaven.RegisterHandler)

@@ -12,6 +12,7 @@ import (
 )
 
 func GetPostContent(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {

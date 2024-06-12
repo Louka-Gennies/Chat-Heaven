@@ -9,6 +9,7 @@ import (
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	session, err := store.Get(r, "session")
 	if err != nil {
 		http.Error(w, "Error retrieving session", http.StatusInternalServerError)

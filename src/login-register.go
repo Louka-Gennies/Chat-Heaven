@@ -10,6 +10,7 @@ import (
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	if r.Method == http.MethodPost {
 		username := r.FormValue("username")
 		email := r.FormValue("email")
@@ -40,6 +41,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	if r.Method == "GET" {
 		http.ServeFile(w, r, "templates/login.html")
 	} else if r.Method == "POST" {
@@ -61,6 +63,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	session, _ := store.Get(r, "session")
 	session.Options.MaxAge = -1
 	session.Save(r, w)

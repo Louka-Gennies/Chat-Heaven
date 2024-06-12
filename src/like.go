@@ -10,6 +10,7 @@ import (
 )
 
 func AddLike(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
@@ -71,6 +72,7 @@ func AddLike(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddDislike(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
@@ -132,6 +134,7 @@ func AddDislike(w http.ResponseWriter, r *http.Request) {
 }
 
 func isLiked(username string, postID int) bool {
+	openDB()
 	var existingLike int
 	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postID).Scan(&existingLike)
 	if err != nil {
@@ -141,6 +144,7 @@ func isLiked(username string, postID int) bool {
 }
 
 func isDisliked(username string, postID int) bool {
+	openDB()
 	var existingDislike int
 	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postID).Scan(&existingDislike)
 	if err != nil {

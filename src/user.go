@@ -14,6 +14,7 @@ import (
 )
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	username := r.URL.Query().Get("username")
 	if username == "" {
 		http.Error(w, "User not specified", http.StatusBadRequest)
@@ -86,6 +87,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	if r.Method == "POST" {
 		username := r.URL.Query().Get("username")
 		firstName := r.FormValue("first_name")
@@ -103,20 +105,24 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func addUser(username, email, motDePasse, profilePicture, date string) error {
+	openDB()
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(motDePasse), bcrypt.DefaultCost)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
 	_, err = db.ExecContext(context.Background(), `INSERT INTO users (username, email, mot_de_passe, profile_picture, first_name, last_name, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		username, email, hashedPassword, profilePicture, "", "", date)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil
 }
 
 func verifyUser(username, motDePasse string) error {
+	openDB()
 	var motDePasseDB string
 	err := db.QueryRowContext(context.Background(), "SELECT mot_de_passe FROM users WHERE username = ?", username).Scan(&motDePasseDB)
 	if err != nil {

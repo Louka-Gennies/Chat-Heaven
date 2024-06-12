@@ -11,6 +11,7 @@ import (
 )
 
 func TopicsHandler(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
@@ -70,6 +71,7 @@ func TopicsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateTopic(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {

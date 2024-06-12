@@ -9,6 +9,7 @@ import (
 )
 
 func getTopics(nbOfTopics int) []Topic {
+	openDB()
 	totalTopics := countTopics()
 	if nbOfTopics > totalTopics {
 		nbOfTopics = totalTopics
@@ -50,6 +51,7 @@ func getTopics(nbOfTopics int) []Topic {
 }
 
 func getPosts(topicTitle string, nbOfPosts ...int) []Post {
+	openDB()
 	var rows *sql.Rows
 	var err error
 
@@ -85,6 +87,7 @@ func getPosts(topicTitle string, nbOfPosts ...int) []Post {
 }
 
 func getTopicByUser(username string) []Topic {
+	openDB()
 	rows, err := db.QueryContext(context.Background(), "SELECT title, description, user FROM topics WHERE user = ?", username)
 	if err != nil {
 		return nil
@@ -103,6 +106,7 @@ func getTopicByUser(username string) []Topic {
 }
 
 func getPostsByUser(username string) []Post {
+	openDB()
 	rows, err := db.QueryContext(context.Background(), "SELECT id, title, content, user, topic FROM posts WHERE user = ?", username)
 	if err != nil {
 		return nil
@@ -121,6 +125,7 @@ func getPostsByUser(username string) []Post {
 }
 
 func getComment(title string) []Comment {
+	openDB()
 	rows, err := db.QueryContext(context.Background(), "SELECT id, content, user FROM comments WHERE post = ?", title)
 	fmt.Println(err)
 	if err != nil {
@@ -143,6 +148,7 @@ func getComment(title string) []Comment {
 }
 
 func getTopicDescription(topic string) string {
+	openDB()
 	var description string
 	err := db.QueryRowContext(context.Background(), "SELECT description FROM topics WHERE title = ?", topic).Scan(&description)
 	if err != nil {
@@ -152,6 +158,7 @@ func getTopicDescription(topic string) string {
 }
 
 func getDatePost(postID int) string {
+	openDB()
 	var date string
 	err := db.QueryRowContext(context.Background(), "SELECT date FROM posts WHERE id = ?", postID).Scan(&date)
 	if err != nil {
@@ -161,6 +168,7 @@ func getDatePost(postID int) string {
 }
 
 func getDateComment(commentID int) string {
+	openDB()
 	var date string
 	err := db.QueryRowContext(context.Background(), "SELECT date FROM comments WHERE id = ?", commentID).Scan(&date)
 	if err != nil {
@@ -170,6 +178,7 @@ func getDateComment(commentID int) string {
 }
 
 func getLastPost(topic string) *LastPost {
+	openDB()
 	var title string
 	err := db.QueryRowContext(context.Background(), "SELECT title FROM posts WHERE topic = ? ORDER BY id DESC LIMIT 1", topic).Scan(&title)
 	if err != nil {

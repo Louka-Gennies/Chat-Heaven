@@ -9,6 +9,7 @@ import (
 )
 
 func DeletePost(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	postTitle := r.URL.Query().Get("post")
 	if postTitle == "" {
 		http.Error(w, "Post not specified", http.StatusBadRequest)
@@ -27,6 +28,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteTopic(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	topicTitle := r.URL.Query().Get("topic")
 	if topicTitle == "" {
 		http.Error(w, "Topic not specified", http.StatusBadRequest)

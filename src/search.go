@@ -10,6 +10,7 @@ import (
 )
 
 func SearchAutocomplete(w http.ResponseWriter, r *http.Request) {
+	openDB()
 	search := r.URL.Query().Get("search")
 
 	rows, err := db.QueryContext(context.Background(), "SELECT username, profile_picture FROM users WHERE username LIKE ?", search+"%")
