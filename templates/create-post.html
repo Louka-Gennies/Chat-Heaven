@@ -1,13 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post Submission</title>
     <link rel="stylesheet" href="../static/css/style.css">
     <link rel="stylesheet" href="../static/css/create-post.css">
+    <link rel="stylesheet" href="../static/css/header.css">
+    <link rel="stylesheet" href="../static/css/footer.css">
+    <style>
+        emoji-picker {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <div class="title"><a href="/"><span class="bold">Chat</span> Heaven</a></div>
+        <div class="logo">
+            <a href="/">
+            </a>
+        </div>
         <div class="search">
             <p>Search...</p>
             <svg width="30" height="30" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -17,26 +31,97 @@
         {{if .}}
         <div class="pfp">
             <a href="/user?username={{.Username}}" class="username">{{.Username}}</a>
-            <a href="/user?username={{.Username}}" class="profile"><img src="{{.ProfilePicture}}" alt="Photo de profil" href="/user?username={{.Username}}" ></a>
+            <a href="/user?username={{.Username}}" class="profile"><img src="{{.ProfilePicture}}" alt="Photo de profil"></a>
         </div>
         {{else}}
         <div class="login"><a href="/login">Login</a></div>
         {{end}}
     </header>
-    <div class= "main"> 
-        <form action="/create-post" method="POST" enctype="multipart/form-data">
-            <label for="title">Title:</label><br>
-            <input type="text" id="title" name="title"><br>
-            <label for="content">Content:</label><br>
-            <textarea id="content" name="content"></textarea><br>
-            <input type="file" id="post_picture" name="post_picture">
-            <input type="submit" value="Submit">
+    <div class="navigation">
+        <div class="breadcrumb">
+            <a href="/">Main page</a> &gt; <a href="/topics">Topics</a> &gt; <a href="/posts?topic={{.Topic}}">{{.Topic}}</a> &gt; <span>Create Post</span>
+        </div>
+    </div>
+    <div class="main">
+        <form action="/create-post?topic={{.Topic}}" method="post" enctype="multipart/form-data">
+            <div class="form-title">
+                <label for="title">Title:</label><br>
+                <input type="text" id="title" name="title" required><br>
+                <label for="content">Content:</label><br>
+                <textarea id="content" name="content" required></textarea><br>
+            </div>
+            <div id="emoji-container" style="position: relative;">
+                <button class="emoji-button" type="button" id="emoji-button">😊</button>
+                <emoji-picker id="emoji-picker" style="display: none; position: absolute;"></emoji-picker>
+            </div>
+            <div class="image-preview-container">
+                <input type="file" id="picture" name="picture" style="display: none;"><br>
+                <button class="image-button" id="upload-button" type="button">Upload Image</button>
+                <div class="picture-preview" id="picture-preview"></div>
+            </div>
+            <input class="submit-button" type="submit" value="Submit">
         </form>
     </div>
     <div class="link-container">
-        <button class="button-link return-button" onclick="location.href='/post'">Return</button>
+        <button class="button-link return-button" onclick="location.href='/posts?topic={{.Topic}}'">Return</button>
         <button class="button-link home-button" onclick="location.href='/'">Home</button>
     </div>
-</div>
+    <div class="footer">
+        <p>Chat Heaven©</p>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@latest/index.min.js" type="module"></script>
+    <script>
+        let currentActiveElement = null;
+    
+        document.querySelectorAll('input, textarea').forEach(element => {
+            element.addEventListener('focus', () => {
+                currentActiveElement = element;
+            });
+        });
+    
+        document.querySelector('#emoji-button').addEventListener('click', () => {
+            const emojiPicker = document.querySelector('#emoji-picker');
+            if (emojiPicker.style.display === 'none') {
+                emojiPicker.style.display = 'block';
+            } else {
+                emojiPicker.style.display = 'none';
+            }
+        });
+    
+        document.querySelector('#emoji-picker')
+            .addEventListener('emoji-click', event => {
+                if (currentActiveElement) {
+                    const start = currentActiveElement.selectionStart;
+                    const end = currentActiveElement.selectionEnd;
+                    currentActiveElement.value = currentActiveElement.value.substring(0, start) + event.detail.unicode + currentActiveElement.value.substring(end);
+                    currentActiveElement.selectionStart = currentActiveElement.selectionEnd = start + event.detail.unicode.length;
+                }
+            });
+        document.addEventListener('click', event => {
+            const emojiPicker = document.querySelector('#emoji-picker');
+            const emojiButton = document.querySelector('#emoji-button');
+            if (!emojiPicker.contains(event.target) && !emojiButton.contains(event.target) && emojiPicker.style.display === 'block') {
+                emojiPicker.style.display = 'none';
+            }
+        });
+
+        document.querySelector('#upload-button').addEventListener('click', () => {
+            document.querySelector('#picture').click();
+        });
+    </script>
+
+    <script>
+        document.querySelector('#picture').addEventListener('change', function(event) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '150px';
+                img.style.height = '150px';
+                document.querySelector('#picture-preview').appendChild(img);
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        });
+    </script>
 </body>
 </html>

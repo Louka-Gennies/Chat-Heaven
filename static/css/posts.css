@@ -51,20 +51,27 @@ main {
 
 }
 
-.tab-forum {
+.tab-post {
+    text-align: left;
     border-collapse: collapse;
-    text-align: left;
-    width: 30%;
+    width: 35%;
 }
 
-.nb-post {
-    width: 30%;
-    text-align: center;
+.author {
+    width: 35%;
+    text-align: left;
 }
 
-.last-post {
-    width: 40%;
-    text-align: left;
+.post-likes {
+    width: 10%;
+}
+
+.post-dislikes {
+    width: 10%;
+}
+
+.post-comments{
+    width: 10%;
 }
 
 .button-container {
@@ -73,7 +80,7 @@ main {
     margin-top: 20px;
 }
 
-.create-topic {
+.create-post {
     height: 15px;
     background-color: #33CCFF;
     padding: 10px 10px;
@@ -85,7 +92,7 @@ main {
     transition: background-color 0.3s;
 }
 
-.create-topic:hover {
+.create-post:hover {
     background-color: #0056b3;
 }
 
@@ -108,48 +115,23 @@ main {
     color: #007BFF;
 }
 
-.topic-container {
+.post-container {
     display: flex;
     align-items: center;
 }
 
-.topic-container svg{
-    border-radius: 40px;
-}
-
-.topic-title {
+.post-title {
     margin-left: 10px;
 }
 
-.nb-post-tab{
+.likes{
     text-align: center;
 }
 
-.last-post-tab {
-    text-align: left;
+.dislikes{
+    text-align: center;
 }
 
-.last-post-tab p {
-    align-items: center;
-    font-size: 14px;
-    font-weight: bold;
-    display: flex;
-}
-
-.last-post-tab a{
-    margin-left: 1%;
-    color: #00A5FF;
-    text-decoration: none;
-}
-
-.last-post-tab a:hover {
-    text-decoration: underline;
-}
-
-.last-post-tab span {
-    color: #949A9E;
-}
-
-.go-to-last-post {
-    fill: black;
+.comments{
+    text-align: center;
 }

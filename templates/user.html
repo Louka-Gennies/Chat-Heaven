@@ -4,24 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/user.css">
 </head>
 <body>
-<h1>Profile of {{.Username}}</h1>
-<p>Email: {{.Email}}</p>
-{{if .ProfilePicture}}
-<img src="{{.ProfilePicture}}" alt="Profile picture" style="width:150px;height:150px;">
-{{end}}
-<form action="/user?username={{.Username}}" method="POST" enctype="multipart/form-data">
-    <label for="profile_picture">Change profile picture:</label>
-    <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+    <main>
+        <div class="card">
+            <div class="pfp">
+                {{if .ProfilePicture}}
+                <img src="{{.ProfilePicture}}" alt="Profile picture" style="width:150px;height:150px;">
+                {{end}}
+            </div>
+            <h1 class="username">{{.Username}}</h1>
+            <p class="email">{{.Email}}</p>
+            <form action="/user?username={{.Username}}" method="POST" enctype="multipart/form-data" id="upload-form">
+                <div id="drop-zone">
+                    <p id="text">Drag and drop a file here or click</p>
+                    <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+                    <img id="preview" src="" alt="Image preview" style="width:150px;height:150px;">
+                </div>
+                <br>
+                <input type="submit" value="Upload">
+            </form>
+        </div>
+        <div class="information">
+            <div class="tab">
+                <button class="tablinks" onclick="openTab(event, 'Tab1')">Personal Info</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab2')">Posts</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab3')">Topics</button>
+            </div>
+
+            <div id="Tab1" class="tabcontent">
+                <h3>Personal Information :</h3>
+                <div class="actual">
+                    <p>Username : {{.Username}}</p>
+                    <p>Email : {{.Email}}</p>
+                    <p>Created the : {{.CreatedAt}}</p>
+                    <p>First Name : {{.FirstName}}</p>
+                    <p>Last Name : {{.LastName}}</p>
+                </div>
+                <div class="update">
+                    <form action="/update-user?username={{.Username}}" method="POST">
+                        <label for="first_name">First Name :</label>
+                        <input type="text" id="first_name" name="first_name" value="{{.FirstName}}">
+                        <br>
+                        <label for="last_name">Last Name :</label>
+                        <input type="text" id="last_name" name="last_name" value="{{.LastName}}">
+                        <br>
+                        <input type="submit" value="Update">
+                    </form>
+                </div>
+            </div>
+
+            <div id="Tab2" class="tabcontent">
+                <h3>Posts</h3>
+                {{range .Posts}}
+                <div class="post">
+                    <a href="/post-content?postID={{.ID}}" class="post-title"><h3>{{.Title}}</h3></a>
+                    <p>{{.Content}}</p>
+                    <form action="/delete-post?post={{.Title}}&user={{.User}}" method="POST">
+                        <input type="submit" value="Delete">
+                    </form>
+                </div>
+                {{end}}
+            </div>
+
+            <div id="Tab3" class="tabcontent">
+                <h3>Topics</h3>
+                {{range .Topics}}
+                <div class="topic">
+                    <a href="/posts?topic={{.Title}}">{{.Title}}</a>
+                    <p>{{.Description}}</p>
+                    <form action="/delete-topic?topic={{.Title}}&user={{.User}}" method="POST">
+                        <input type="submit" value="Delete">
+                    </form>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </main>
+    <a href="/">Back to home</a>
     <br>
-    <input type="submit" value="Upload">
-</form>
-<br>
-<a href="/">Back to home</a>
-<br>
-<form action="/logout" method="POST" style="display: inline;">
-    <input type="submit" value="Log out">
-</form>
+    <form action="/logout" method="POST" style="display: inline;">
+        <input type="submit" value="Log out">
+    </form>
+    <script src="../static/js/dragAndDropImg.js"></script>
+    <script src="../static/js/tabs.js"></script>
 </body>
 </html>

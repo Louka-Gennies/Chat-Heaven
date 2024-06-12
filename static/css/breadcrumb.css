@@ -1,0 +1,17 @@
+.breadcrumb {
+    padding: 10px 0;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+    align-self: flex-start;
+    width: 70%;
+    text-align: left;
+}
+
+.breadcrumb a {
+    text-decoration: none;
+    color: #007BFF;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
