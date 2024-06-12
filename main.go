@@ -25,6 +25,7 @@ type Topic struct {
 	Title       string
 	Description string
 	NbPosts     int
+	User 	    string
 }
 
 type Post struct {
@@ -150,6 +151,8 @@ func main() {
 	http.HandleFunc("/like-post", addLike)
 	http.HandleFunc("/dislike-post", addDislike)
 	http.HandleFunc("/update-user", updateUser)
+	http.HandleFunc("/delete-post", deletePost)
+	http.HandleFunc("/delete-topic", deleteTopic)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("Server started at :8080")
@@ -157,7 +160,12 @@ func main() {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session")
+	session, err := store.Get(r, "session")
+	if err != nil {
+    http.Error(w, "Error retrieving session", http.StatusInternalServerError)
+    return
+    }
+
 	username, ok := session.Values["username"]
 
 	if !ok {
@@ -186,39 +194,39 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		tmpl.Execute(w, data)
 		return
+	} else if ok {
+		var profilePicture string
+		err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+		if err != nil {
+			http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
+			return
+		}
+	
+		data := struct {
+			Username       string
+			ProfilePicture string
+			NbPosts        int
+			NbTopics       int
+			NbUsers        int
+			Last4Topics    []Topic
+			IsLogged       bool
+		}{
+			Username:       username.(string),
+			ProfilePicture: profilePicture,
+			NbPosts:        countPosts(),
+			NbTopics:       countTopics(),
+			NbUsers:        countUsers(),
+			Last4Topics:    getTopics(3),
+			IsLogged:       true,
+		}
+	
+		tmpl, err := template.ParseFiles("templates/home.html")
+		if err != nil {
+			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, data)
 	}
-
-	var profilePicture string
-	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
-	if err != nil {
-		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
-		return
-	}
-
-	data := struct {
-		Username       string
-		ProfilePicture string
-		NbPosts        int
-		NbTopics       int
-		NbUsers        int
-		Last4Topics    []Topic
-		Islogged       bool
-	}{
-		Username:       username.(string),
-		ProfilePicture: profilePicture,
-		NbPosts:        countPosts(),
-		NbTopics:       countTopics(),
-		NbUsers:        countUsers(),
-		Last4Topics:    getTopics(3),
-		Islogged:       true,
-	}
-
-	tmpl, err := template.ParseFiles("templates/home.html")
-	if err != nil {
-		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, data)
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
@@ -294,14 +302,18 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			ProfilePicture string
 			FirstName      string
 			LastName       string
-			CreatedAt      string
+			CreatedAt 	   string
+			Posts		  []Post
+			Topics		  []Topic
 		}{
 			Username:       username,
 			Email:          email,
 			ProfilePicture: profilePicture,
 			FirstName:      first_name,
 			LastName:       last_name,
-			CreatedAt:      createdAt,
+			CreatedAt: 	    createdAt,
+			Posts:          getPostsByUser(username),
+			Topics:         getTopicByUser(username),
 		}
 
 		tmpl, err := template.ParseFiles("templates/user.html")
@@ -499,18 +511,18 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		defer f.Close()
 		io.Copy(f, file)
 
-        if !ok {
-            http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
-            return
-        }
-        _, err = db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic, picture, date) VALUES (?, ?, ?, ?, ?, ?)", username, title, content, topicTitle, filePath ,date)
-        if err != nil {
-            fmt.Println(err)
-            http.Error(w, "Error posting the message", http.StatusInternalServerError)
-            return
-        }
-        fmt.Println("Post added successfully!")
-        http.Redirect(w, r, fmt.Sprintf("/posts?topic=%s", topic), http.StatusSeeOther)
+		if !ok {
+			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
+			return
+		}
+		_, err = db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic, date) VALUES (?, ?, ?, ?, ?)", username, title, content, topicTitle, date)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Error posting the message", http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("Post added successfully!")
+		http.Redirect(w, r, fmt.Sprintf("/posts?topic=%s", topic), http.StatusSeeOther)
 
     }
 
@@ -616,7 +628,6 @@ func createTopic(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err := db.ExecContext(context.Background(), "INSERT INTO topics (user, title, description, date) VALUES (?, ?, ?, ?)", username, title, description, date)
 		if err != nil {
-			fmt.Println(err)
 			http.Error(w, "Error posting the message", http.StatusInternalServerError)
 			return
 		}
@@ -738,6 +749,42 @@ func getPosts(topicTitle string, nbOfPosts ...int) []Post {
 	return posts
 }
 
+func getTopicByUser(username string) []Topic {
+	rows, err := db.QueryContext(context.Background(), "SELECT title, description, user FROM topics WHERE user = ?", username)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	var topics []Topic
+	for rows.Next() {
+		var topic Topic
+		if err := rows.Scan(&topic.Title, &topic.Description, &topic.User); err != nil {
+			return nil
+		}
+		topics = append(topics, topic)
+	}
+	return topics
+}
+
+func getPostsByUser(username string) []Post {
+	rows, err := db.QueryContext(context.Background(), "SELECT id, title, content, user, topic FROM posts WHERE user = ?", username)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.User, &post.Topic); err != nil {
+			return nil
+		}
+		posts = append(posts, post)
+	}
+	return posts
+}
+
 func getComment(title string) []Comment {
 	rows, err := db.QueryContext(context.Background(), "SELECT content, user FROM comments WHERE post = ?", title)
 	if err != nil {
@@ -780,6 +827,10 @@ func dislikeCount(postID int) int {
 func getPostContent(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
+	if err != nil {
+		http.Error(w, "Error converting the post ID", http.StatusInternalServerError)
+		return
+	}
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
@@ -797,10 +848,6 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
 		return
-	}
-	if err != nil {
-		// handle error
-		fmt.Println(err)
 	}
 	if postID == "" {
 		http.Error(w, "Message not specified", http.StatusBadRequest)
@@ -872,7 +919,6 @@ func addLike(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
-		// handle error
 		fmt.Println(err)
 	}
 	if postID == "" {
@@ -934,7 +980,6 @@ func addDislike(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
-		// handle error
 		fmt.Println(err)
 	}
 	if postID == "" {
@@ -1008,4 +1053,41 @@ func isDisliked(username string, postID int) bool {
 		return false
 	}
 	return existingDislike > 0
+}
+
+func deletePost(w http.ResponseWriter, r *http.Request) {
+	postTitle := r.URL.Query().Get("post")
+	if postTitle == "" {
+		http.Error(w, "Post not specified", http.StatusBadRequest)
+		return
+	}
+
+	_, err := db.ExecContext(context.Background(), "DELETE FROM posts WHERE title = ?", postTitle)
+	if err != nil {
+		http.Error(w, "Error deleting the post", http.StatusInternalServerError)
+		return
+	}
+
+	username := r.URL.Query().Get("user")
+
+
+	http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
+}
+
+func deleteTopic(w http.ResponseWriter, r *http.Request) {
+	topicTitle := r.URL.Query().Get("topic")
+	if topicTitle == "" {
+		http.Error(w, "Topic not specified", http.StatusBadRequest)
+		return
+	}
+
+	_, err := db.ExecContext(context.Background(), "DELETE FROM topics WHERE title = ?", topicTitle)
+	if err != nil {
+		http.Error(w, "Error deleting the topic", http.StatusInternalServerError)
+		return
+	}
+
+	username := r.URL.Query().Get("user")
+
+	http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
 }
