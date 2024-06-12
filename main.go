@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -26,6 +27,7 @@ type Topic struct {
 	Description string
 	NbPosts     int
 	User 	    string
+	LastPost    *LastPost
 }
 
 type Post struct {
@@ -40,12 +42,27 @@ type Post struct {
 	LikeDislikeDifference int
 	AlreadyLiked          bool
 	AlreadyDisliked       bool
+	Date                  string
 }
 
 type Comment struct {
+	CommentID int
 	Content   string
 	User      string
 	PostTitle string
+	Date      string
+}
+
+type LastPost struct {
+	Title  string
+	Author string
+	Date   string
+	ID     int
+}
+
+type Result struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }
 
 func main() {
@@ -152,6 +169,7 @@ func main() {
 	http.HandleFunc("/update-user", updateUser)
 	http.HandleFunc("/delete-post", deletePost)
 	http.HandleFunc("/delete-topic", deleteTopic)
+	http.HandleFunc("/search_autocomplete", searchAutocomplete)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("Server started at :8080")
@@ -200,7 +218,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
 			return
 		}
-	
+
 		data := struct {
 			Username       string
 			ProfilePicture string
@@ -218,7 +236,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			Last4Topics:    getTopics(3),
 			IsLogged:       true,
 		}
-	
+
 		tmpl, err := template.ParseFiles("templates/home.html")
 		if err != nil {
 			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
@@ -304,6 +322,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			CreatedAt 	   string
 			Posts		  []Post
 			Topics		  []Topic
+			CreatedAt      string
 		}{
 			Username:       username,
 			Email:          email,
@@ -313,6 +332,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			CreatedAt: 	    createdAt,
 			Posts:          getPostsByUser(username),
 			Topics:         getTopicByUser(username),
+			CreatedAt:      createdAt,
 		}
 
 		tmpl, err := template.ParseFiles("templates/user.html")
@@ -432,15 +452,17 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Topic          string
-		Post           []Post
-		Username       string
-		ProfilePicture string
+		Topic            string
+		TopicDescription string
+		Post             []Post
+		Username         string
+		ProfilePicture   string
 	}{
-		Topic:          topic,
-		Post:           Posts,
-		Username:       username.(string),
-		ProfilePicture: profilePicture,
+		Topic:            topic,
+		TopicDescription: getTopicDescription(topic),
+		Post:             Posts,
+		Username:         username.(string),
+		ProfilePicture:   profilePicture,
 	}
 
 	tmpl.Execute(w, data)
@@ -549,8 +571,10 @@ func topicsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		topic.NbPosts = len(getPosts(topic.Title))
+		topic.LastPost = getLastPost(topic.Title)
 		Topics = append(Topics, topic)
 	}
+	fmt.Println(Topics)
 
 	data := struct {
 		Topic          []Topic
@@ -723,6 +747,7 @@ func getPosts(topicTitle string, nbOfPosts ...int) []Post {
 		post.Likes = likeCount(post.ID)
 		post.Dislikes = dislikeCount(post.ID)
 		post.NbComments = len(getComment(post.Title))
+		post.Date = getDatePost(post.ID)
 		posts = append(posts, post)
 	}
 	return posts
@@ -774,9 +799,10 @@ func getComment(title string) []Comment {
 	var comments []Comment
 	for rows.Next() {
 		var comment Comment
-		if err := rows.Scan(&comment.Content, &comment.User); err != nil {
+		if err := rows.Scan(&comment.CommentID, &comment.Content, &comment.User); err != nil {
 			return nil
 		}
+		comment.Date = getDateComment(comment.CommentID)
 		comment.PostTitle = title
 		comments = append(comments, comment)
 	}
@@ -828,6 +854,10 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
 		return
 	}
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+	}
 	if postID == "" {
 		http.Error(w, "Message not specified", http.StatusBadRequest)
 		return
@@ -875,6 +905,7 @@ func getPostContent(w http.ResponseWriter, r *http.Request) {
 			LikeDislikeDifference: likeCount(postIDInt) - dislikeCount(postIDInt),
 			AlreadyLiked:          isLiked(username.(string), postIDInt),
 			AlreadyDisliked:       isDisliked(username.(string), postIDInt),
+			Date:                  getDatePost(postIDInt),
 		},
 		Comment:        getComment(title),
 		Username:       username.(string),
@@ -1064,4 +1095,93 @@ func deleteTopic(w http.ResponseWriter, r *http.Request) {
 	username := r.URL.Query().Get("user")
 
 	http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
+}
+func getTopicDescription(topic string) string {
+	var description string
+	err := db.QueryRowContext(context.Background(), "SELECT description FROM topics WHERE title = ?", topic).Scan(&description)
+	if err != nil {
+		return ""
+	}
+	return description
+}
+
+func getDatePost(postID int) string {
+	var date string
+	err := db.QueryRowContext(context.Background(), "SELECT date FROM posts WHERE id = ?", postID).Scan(&date)
+	if err != nil {
+		return ""
+	}
+	return date
+}
+
+func getDateComment(commentID int) string {
+	var date string
+	err := db.QueryRowContext(context.Background(), "SELECT date FROM comments WHERE id = ?", commentID).Scan(&date)
+	if err != nil {
+		return ""
+	}
+	return date
+}
+
+func getLastPost(topic string) *LastPost {
+	var title string
+	err := db.QueryRowContext(context.Background(), "SELECT title FROM posts WHERE topic = ? ORDER BY id DESC LIMIT 1", topic).Scan(&title)
+	if err != nil {
+		return nil
+	}
+
+	var lastPost LastPost
+	err = db.QueryRowContext(context.Background(), "SELECT title, user, date, id FROM posts WHERE title = ?", title).Scan(&lastPost.Title, &lastPost.Author, &lastPost.Date, &lastPost.ID)
+	if err != nil {
+		return nil
+	}
+
+	return &lastPost
+}
+
+func searchAutocomplete(w http.ResponseWriter, r *http.Request) {
+	search := r.URL.Query().Get("search")
+
+	rows, err := db.QueryContext(context.Background(), "SELECT username, profile_picture FROM users WHERE username LIKE ?", search+"%")
+	if err != nil {
+		http.Error(w, "Error retrieving the users", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var results []map[string]string
+	for rows.Next() {
+		var user, profilePicture string
+		if err := rows.Scan(&user, &profilePicture); err != nil {
+			http.Error(w, "Error reading the users", http.StatusInternalServerError)
+			return
+		}
+		results = append(results, map[string]string{"type": "user", "value": user, "profil_picture": profilePicture})
+	}
+
+	rows, err = db.QueryContext(context.Background(), "SELECT title FROM topics WHERE title LIKE ?", search+"%")
+	if err != nil {
+		http.Error(w, "Error retrieving the topics", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var topic string
+		if err := rows.Scan(&topic); err != nil {
+			http.Error(w, "Error reading the topics", http.StatusInternalServerError)
+			return
+		}
+		results = append(results, map[string]string{"type": "topic", "value": topic})
+	}
+	fmt.Println(results)
+
+	jsonData, err := json.Marshal(results)
+	if err != nil {
+		http.Error(w, "Error converting results to JSON", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
 }
