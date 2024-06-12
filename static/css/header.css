@@ -133,3 +133,10 @@ header a {
     border-radius: 50%;
     margin-right: 10px;
 }
+
+.ui-menu-item-wrapper {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}

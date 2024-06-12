@@ -788,7 +788,8 @@ func getPostsByUser(username string) []Post {
 }
 
 func getComment(title string) []Comment {
-	rows, err := db.QueryContext(context.Background(), "SELECT content, user FROM comments WHERE post = ?", title)
+	rows, err := db.QueryContext(context.Background(), "SELECT id, content, user FROM comments WHERE post = ?", title)
+	fmt.Println(err)
 	if err != nil {
 		return nil
 	}
@@ -804,6 +805,7 @@ func getComment(title string) []Comment {
 		comment.PostTitle = title
 		comments = append(comments, comment)
 	}
+
 	return comments
 }
 
