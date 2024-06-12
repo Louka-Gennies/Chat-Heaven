@@ -54,6 +54,16 @@ header a {
     align-self: center;
 }
 
+.search input {
+    border: none;
+    background-color: #E9E7E7;
+    font-size: 25px;
+    font-weight: 500;
+    color: #857E7E;
+    width: 100%;
+    outline: none;
+}
+
 .search svg {
     align-self: center;
 }
@@ -105,4 +115,21 @@ header a {
 
 .pfp {
     margin-right: 2%;
+}
+
+.autocomplete-results {
+    z-index: 10002 !important;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #E9E7E7;
+    border-radius: 10px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.autocomplete-results img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
 }

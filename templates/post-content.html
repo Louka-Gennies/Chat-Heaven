@@ -31,7 +31,7 @@
 <body>
 <main>
     <div class="breadcrumb">
-        <a href="/">Main page</a> > <a href="/topics">Community</a> > <a href="/posts?topic={{.Post.Topic}}">{{.Post.Topic}}</a> > <span>{{.Post.Title}}</span>
+        <a href="/">Main page</a> > <a href="/topics">Topics</a> > <a href="/posts?topic={{.Post.Topic}}">{{.Post.Topic}}</a> > <span>{{.Post.Title}}</span>
     </div>
     <div class = "post-container">
         <div class = "post-info">
@@ -76,8 +76,8 @@
                 </div>
             </div>
             <div class = "author-date">
-                <p>by <a href = "#" class ="author">{{.Post.User}} </a> </p>
-                <p class ="date"> inserer ici la date</p>
+                <p>by <a href = "/user?username={{.Post.User}}" class ="author">{{.Post.User}} </a> </p>
+                <p class ="date"> {{.Post.Date}}</p>
             </div>
             <div class="image">
                 <img src="..\{{.Post.Picture}}" alt="image">

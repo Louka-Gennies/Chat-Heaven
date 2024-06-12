@@ -124,3 +124,32 @@ main {
 .nb-post-tab{
     text-align: center;
 }
+
+.last-post-tab {
+    text-align: left;
+}
+
+.last-post-tab p {
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+}
+
+.last-post-tab a{
+    margin-left: 1%;
+    color: #00A5FF;
+    text-decoration: none;
+}
+
+.last-post-tab a:hover {
+    text-decoration: underline;
+}
+
+.last-post-tab span {
+    color: #949A9E;
+}
+
+.go-to-last-post {
+    fill: black;
+}
