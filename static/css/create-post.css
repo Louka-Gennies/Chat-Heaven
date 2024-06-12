@@ -65,7 +65,6 @@ textarea {
 .submit-button {
     display: block;
     margin: auto;
-    margin-top: 30px;
     padding: 17px 40px;
     border-radius: 50px;
     cursor: pointer;
@@ -77,6 +76,7 @@ textarea {
     text-transform: uppercase;
     font-size: 15px;
     transition: all 0.5s ease;
+    margin-top: 80px;
 }
   
 .submit-button:hover {
@@ -98,7 +98,6 @@ textarea {
   .link-container {
     display: flex;
     justify-content: center;
-    margin-top: -20px;
 }
 
   .button-link {
@@ -196,7 +195,7 @@ emoji-picker {
   touch-action: manipulation;
   vertical-align: baseline;
   width: auto;
-  margin-top: -100px;
+
  }
  
  .image-button:hover,
@@ -217,3 +216,10 @@ emoji-picker {
   color: rgba(0, 0, 0, 0.65);
   transform: translateY(0);
  }
+
+ .image-preview-container {
+  display: flex;
+  align-items: flex-start; /* Aligns the items vertically at the top */
+  gap: 10px; /* Space between the items */
+  flex-wrap: wrap; /* Allows the items to wrap onto multiple lines */
+}

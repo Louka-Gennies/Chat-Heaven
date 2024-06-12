@@ -54,8 +54,11 @@
                 <button class="emoji-button" type="button" id="emoji-button">😊</button>
                 <emoji-picker id="emoji-picker" style="display: none; position: absolute;"></emoji-picker>
             </div>
-            <input type="file" id="upload-button" name="image" style="display: none;"><br>
-            <button class="image-button" id="upload-button" type="button">Upload Image</button>
+            <div class="image-preview-container">
+                <input type="file" id="picture" name="picture" style="display: none;"><br>
+                <button class="image-button" id="upload-button" type="button">Upload Image</button>
+                <div class="picture-preview" id="picture-preview"></div>
+            </div>
             <input class="submit-button" type="submit" value="Submit">
         </form>
     </div>
@@ -102,9 +105,23 @@
             }
         });
 
-        document.querySelector('.image-button').addEventListener('click', () => {
-        document.querySelector('#upload-button').click();
-    });
+        document.querySelector('#upload-button').addEventListener('click', () => {
+            document.querySelector('#picture').click();
+        });
+    </script>
+
+    <script>
+        document.querySelector('#picture').addEventListener('change', function(event) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '150px';
+                img.style.height = '150px';
+                document.querySelector('#picture-preview').appendChild(img);
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        });
     </script>
 </body>
 </html>
