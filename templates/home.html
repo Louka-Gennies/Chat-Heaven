@@ -205,7 +205,7 @@
                 console.log(item.profil_picture)
                 var imgSrc = item.type === "topic" ? "/static/img/topic-logo.png" : item.profil_picture ;
                 return $("<li>")
-                    .append("<div><img src='" + imgSrc + "' /> " + item.label + "</div>")
+                    .append("<div><img src='" + imgSrc + "' width='50px' height='50px' /> " + item.label + "</div>")
                     .appendTo(ul);
             };
         });
