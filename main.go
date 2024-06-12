@@ -26,7 +26,7 @@ type Topic struct {
 	Title       string
 	Description string
 	NbPosts     int
-	User 	    string
+	User        string
 	LastPost    *LastPost
 }
 
@@ -179,9 +179,9 @@ func main() {
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
-    http.Error(w, "Error retrieving session", http.StatusInternalServerError)
-    return
-    }
+		http.Error(w, "Error retrieving session", http.StatusInternalServerError)
+		return
+	}
 
 	username, ok := session.Values["username"]
 
@@ -203,7 +203,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			Last4Topics:    getTopics(3),
 			IsLogged:       false,
 		}
-	
+
 		tmpl, err := template.ParseFiles("templates/home.html")
 		if err != nil {
 			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
@@ -319,9 +319,8 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			ProfilePicture string
 			FirstName      string
 			LastName       string
-			CreatedAt 	   string
-			Posts		  []Post
-			Topics		  []Topic
+			Posts          []Post
+			Topics         []Topic
 			CreatedAt      string
 		}{
 			Username:       username,
@@ -329,7 +328,6 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			ProfilePicture: profilePicture,
 			FirstName:      first_name,
 			LastName:       last_name,
-			CreatedAt: 	    createdAt,
 			Posts:          getPostsByUser(username),
 			Topics:         getTopicByUser(username),
 			CreatedAt:      createdAt,
@@ -1074,7 +1072,6 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	username := r.URL.Query().Get("user")
-
 
 	http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
 }
