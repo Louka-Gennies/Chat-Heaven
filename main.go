@@ -19,7 +19,7 @@ func main() {
 	var err error
 	db, err = sql.Open("sqlite", dbPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to open database: %v", err)
 	}
 	defer db.Close()
 

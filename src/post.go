@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -112,9 +111,9 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		}
 		defer file.Close()
 
-		os.MkdirAll("static/uploads", os.ModePerm)
+		os.MkdirAll("uploads", os.ModePerm)
 
-		filePath := filepath.Join("static/uploads", handler.Filename)
+		filePath := "uploads/" + handler.Filename
 		f, err := os.Create(filePath)
 		if err != nil {
 			http.Error(w, "Error saving the file", http.StatusInternalServerError)
@@ -127,9 +126,8 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
 			return
 		}
-		_, err = db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, topic, date) VALUES (?, ?, ?, ?, ?)", username, title, content, topicTitle, date)
+		_, err = db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, picture, topic, date) VALUES (?, ?, ?, ?, ?, ?)", username, title, content, filePath, topicTitle, date)
 		if err != nil {
-			fmt.Println(err)
 			http.Error(w, "Error posting the message", http.StatusInternalServerError)
 			return
 		}

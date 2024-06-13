@@ -94,8 +94,6 @@ func GetPostContent(w http.ResponseWriter, r *http.Request) {
 		ProfilePicture: profilePicture,
 	}
 
-	fmt.Print(data.Post.Picture)
-
 	tmpl, err := template.ParseFiles("templates/post-content.html")
 	if err != nil {
 		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)

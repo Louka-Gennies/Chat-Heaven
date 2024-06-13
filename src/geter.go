@@ -26,6 +26,7 @@ func getTopics(nbOfTopics int) []Topic {
 			if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
 				return nil
 			}
+			topic.LastPost = getLastPost(topic.Title)
 			topics = append(topics, topic)
 		}
 		return topics
@@ -42,7 +43,7 @@ func getTopics(nbOfTopics int) []Topic {
 			if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
 				return nil
 			}
-
+			topic.LastPost = getLastPost(topic.Title)
 			topics = append(topics, topic)
 		}
 		return topics
