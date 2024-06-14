@@ -104,22 +104,30 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		date := time.Now().Format("02-01-2006 15:04")
 
 		file, handler, err := r.FormFile("picture")
-		if err != nil {
-			http.Error(w, "Error during file upload", http.StatusInternalServerError)
-			return
-		}
-		defer file.Close()
 
-		os.MkdirAll("uploads", os.ModePerm)
+		var filePath string
 
-		filePath := "uploads/" + handler.Filename
-		f, err := os.Create(filePath)
-		if err != nil {
-			http.Error(w, "Error saving the file", http.StatusInternalServerError)
-			return
+		if file == nil {
+			filePath = ""
+		} else {
+			if err != nil {
+				http.Error(w, "Error during file upload", http.StatusInternalServerError)
+				return
+			}
+			defer file.Close()
+	
+			os.MkdirAll("static/uploads", os.ModePerm)
+	
+			filePath = "static/uploads/" + handler.Filename
+			f, err := os.Create(filePath)
+			if err != nil {
+				http.Error(w, "Error saving the file", http.StatusInternalServerError)
+				return
+			}
+			defer f.Close()
+			io.Copy(f, file)
 		}
-		defer f.Close()
-		io.Copy(f, file)
+
 
 		if !ok {
 			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
