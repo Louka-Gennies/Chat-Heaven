@@ -2,6 +2,7 @@ package chatHeaven
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -66,9 +67,10 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 			NbPosts:        countPosts(),
 			NbTopics:       countTopics(),
 			NbUsers:        countUsers(),
-			Last4Topics:    getTopics(3),
+			Last4Topics:    getTopics(4),
 			IsLogged:       true,
 		}
+		fmt.Println(data.Last4Topics)
 
 		tmpl, err := template.ParseFiles("templates/home.html")
 		if err != nil {

@@ -3,7 +3,6 @@ package chatHeaven
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	_ "modernc.org/sqlite"
@@ -45,7 +44,6 @@ func SearchAutocomplete(w http.ResponseWriter, r *http.Request) {
 		}
 		results = append(results, map[string]string{"type": "topic", "value": topic})
 	}
-	fmt.Println(results)
 
 	jsonData, err := json.Marshal(results)
 	if err != nil {

@@ -37,7 +37,6 @@ func GetPostContent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(err)
 	if postID == "" {
 		http.Error(w, "Message not specified", http.StatusBadRequest)
 		return

@@ -236,6 +236,11 @@ main {
     fill: #555;
 }
 
+.edit-delete a {
+    text-decoration: none;
+    color: #00A5FF;
+}
+
 
 
 

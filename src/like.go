@@ -14,7 +14,6 @@ func AddLike(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
-		fmt.Println(err)
 	}
 	if postID == "" {
 		http.Error(w, "Message not specified", http.StatusBadRequest)
@@ -76,7 +75,6 @@ func AddDislike(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
-		fmt.Println(err)
 	}
 	if postID == "" {
 		http.Error(w, "Message not specified", http.StatusBadRequest)

@@ -113,7 +113,6 @@ func addUser(username, email, motDePasse, profilePicture, date string) error {
 	_, err = db.ExecContext(context.Background(), `INSERT INTO users (username, email, mot_de_passe, profile_picture, first_name, last_name, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		username, email, hashedPassword, profilePicture, "", "", date)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	return nil

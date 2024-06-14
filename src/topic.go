@@ -2,7 +2,6 @@ package chatHeaven
 
 import (
 	"context"
-	"fmt"
 	"html/template"
 	"net/http"
 	"time"
@@ -55,7 +54,6 @@ func TopicsHandler(w http.ResponseWriter, r *http.Request) {
 		topic.LastPost = getLastPost(topic.Title)
 		Topics = append(Topics, topic)
 	}
-	fmt.Println(Topics)
 
 	data := struct {
 		Topic          []Topic
@@ -116,8 +114,6 @@ func CreateTopic(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error posting the message", http.StatusInternalServerError)
 			return
 		}
-
-		fmt.Println("Topic added successfully!")
 		http.Redirect(w, r, "/topics", http.StatusSeeOther)
 
 	}

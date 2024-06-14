@@ -127,22 +127,24 @@ main {
     color: #000000;
     font-weight: 550;
     padding: 20px;
-    text-align: left;
     font-size: 24px;
 
 }
 
 .tab-forum {
     border-collapse: collapse;
-    width: 50%;
+    text-align: left;
+    width: 30%;
 }
 
 .nb-posts {
-    width: 10%;
+    width: 30%;
+    text-align: center;
 }
 
 .last-post {
     width: 40%;
+    text-align: left;
 }
 
 

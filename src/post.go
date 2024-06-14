@@ -105,7 +105,6 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 		file, handler, err := r.FormFile("picture")
 		if err != nil {
-			fmt.Print(err)
 			http.Error(w, "Error during file upload", http.StatusInternalServerError)
 			return
 		}
@@ -131,7 +130,6 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error posting the message", http.StatusInternalServerError)
 			return
 		}
-		fmt.Println("Post added successfully!")
 		http.Redirect(w, r, fmt.Sprintf("/posts?topic=%s", topic), http.StatusSeeOther)
 
 	}

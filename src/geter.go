@@ -3,8 +3,6 @@ package chatHeaven
 import (
 	"context"
 	"database/sql"
-	"fmt"
-
 	_ "modernc.org/sqlite"
 )
 
@@ -21,13 +19,19 @@ func getTopics(nbOfTopics int) []Topic {
 		defer rows.Close()
 
 		topics := make([]Topic, 0, nbOfTopics)
+		i := 0
 		for rows.Next() {
+			if i == nbOfTopics {
+				break
+			}
 			var topic Topic
 			if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
 				return nil
 			}
+			topic.NbPosts = len(getPosts(topic.Title))
 			topic.LastPost = getLastPost(topic.Title)
 			topics = append(topics, topic)
+			i++
 		}
 		return topics
 	} else {
@@ -43,6 +47,7 @@ func getTopics(nbOfTopics int) []Topic {
 			if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
 				return nil
 			}
+			topic.NbPosts = len(getPosts(topic.Title))
 			topic.LastPost = getLastPost(topic.Title)
 			topics = append(topics, topic)
 		}
@@ -123,7 +128,6 @@ func getPostsByUser(username string) []Post {
 
 func getComment(title string) []Comment {
 	rows, err := db.QueryContext(context.Background(), "SELECT id, content, user FROM comments WHERE post = ?", title)
-	fmt.Println(err)
 	if err != nil {
 		return nil
 	}

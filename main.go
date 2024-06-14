@@ -118,6 +118,7 @@ func main() {
 	http.HandleFunc("/delete-post", chatHeaven.DeletePost)
 	http.HandleFunc("/delete-topic", chatHeaven.DeleteTopic)
 	http.HandleFunc("/search_autocomplete", chatHeaven.SearchAutocomplete)
+	http.HandleFunc("/edit-post", chatHeaven.EditPost)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("Server started at :8080")
