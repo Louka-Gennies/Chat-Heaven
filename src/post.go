@@ -113,23 +113,24 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		title, content, topicTitle := r.FormValue("title"), r.FormValue("content"), r.FormValue("topic")
 		date := time.Now().Format("02-01-2006 15:04")
 
+		var filePath string
 		file, handler, err := r.FormFile("picture")
-		if err != nil {
-			ErrorHandler(w, r)
-			return
-		}
-		defer file.Close()
+		if err == nil {
+			defer file.Close()
 
-		os.MkdirAll("uploads", os.ModePerm)
+			os.MkdirAll("static/uploads/", os.ModePerm)
 
-		filePath := "uploads/" + handler.Filename
-		f, err := os.Create(filePath)
-		if err != nil {
-			ErrorHandler(w, r)
-			return
+			filePath = "static/uploads/" + handler.Filename
+			f, err := os.Create(filePath)
+			if err != nil {
+				ErrorHandler(w, r)
+				return
+			}
+			defer f.Close()
+			io.Copy(f, file)
+		} else {
+			filePath = "" 
 		}
-		defer f.Close()
-		io.Copy(f, file)
 
 		if !ok {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -141,7 +142,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		http.Redirect(w, r, fmt.Sprintf("/posts?topic=%s", topic), http.StatusSeeOther)
-
+		return
 	}
 
 	tmpl.Execute(w, data)
