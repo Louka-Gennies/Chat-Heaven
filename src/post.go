@@ -123,7 +123,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		io.Copy(f, file)
 
 		if !ok {
-			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 		_, err = db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, picture, topic, date) VALUES (?, ?, ?, ?, ?, ?)", username, title, content, filePath, topicTitle, date)

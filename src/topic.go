@@ -106,7 +106,7 @@ func CreateTopic(w http.ResponseWriter, r *http.Request) {
 		date := time.Now().Format("02-01-2006 15:04")
 
 		if !ok {
-			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 		_, err := db.ExecContext(context.Background(), "INSERT INTO topics (user, title, description, date) VALUES (?, ?, ?, ?)", username, title, description, date)

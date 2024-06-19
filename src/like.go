@@ -23,7 +23,7 @@ func AddLike(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
-		http.Error(w, "You must be logged in to like a message", http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
@@ -84,7 +84,7 @@ func AddDislike(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
-		http.Error(w, "You must be logged in to like a message", http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 

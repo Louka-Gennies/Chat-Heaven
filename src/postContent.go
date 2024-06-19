@@ -56,7 +56,7 @@ func GetPostContent(w http.ResponseWriter, r *http.Request) {
 		comment := r.FormValue("content")
 		date := time.Now().Format("02-01-2006 15:04")
 		if !ok {
-			http.Error(w, "You must be logged in to comment on a message", http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 		_, err := db.ExecContext(context.Background(), "INSERT INTO comments (user, content, post, date) VALUES (?, ?, ?, ?)", username, comment, title, date)

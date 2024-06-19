@@ -46,7 +46,11 @@
             <button class="sort-button" id="sort-author" onclick="window.location.href='/posts?topic={{.Topic}}&sort=author'">Sort by author</button>
             <button class="sort-button" id="sort-title" onclick="window.location.href='/posts?topic={{.Topic}}'">Reset</button>
         </div>
-        <a href="/create-post?topic={{.Topic}}" class="create-post"> + New Post</a>
+        {{if .User}}
+            <a href="/create-post?topic={{.Topic}}" class="create-post"> + New Post</a>
+        {{else}}
+            <a href="/login" class="create-post"> + New Post</a>
+        {{end}}
     </div>
     <div class="forum">
         <table>
