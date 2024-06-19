@@ -115,7 +115,6 @@ func GetPostContent(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			http.Redirect(w, r, fmt.Sprintf("/post-content?postID=%d", postIDInt), http.StatusSeeOther)
-
 		}
 
 		data := struct {

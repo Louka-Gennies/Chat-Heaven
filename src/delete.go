@@ -45,3 +45,22 @@ func DeleteTopic(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
 }
+
+func DeleteComment(w http.ResponseWriter, r *http.Request) {
+	openDB()
+	commentID := r.URL.Query().Get("commentID")
+	if commentID == "" {
+		ErrorHandler(w, r)
+		return
+	}
+
+	_, err := db.ExecContext(context.Background(), "DELETE FROM comments WHERE id = ?", commentID)
+	if err != nil {
+		ErrorHandler(w, r)
+		return
+	}
+
+	username := r.URL.Query().Get("user")
+
+	http.Redirect(w, r, fmt.Sprintf("/user?username=%s", username), http.StatusSeeOther)
+}

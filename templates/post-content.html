@@ -119,6 +119,11 @@
                         <p>{{.Content}}</p>
                     </div>
                 </div>
+                <div class ="edit-delete">
+                    {{if eq .User $.Username}}
+                    <a href="/delete-comment?commentID={{.CommentID}}&user={{$.Username}}" class ="delete">Delete</a>
+                    {{end}}
+                </div>
             </div>
         </div>
         {{end}}
