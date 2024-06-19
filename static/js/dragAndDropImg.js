@@ -7,6 +7,30 @@ document.addEventListener("DOMContentLoaded", function() {
     preview.style.display = 'none';
     text.style.display = 'block';
 
+    dropZone.onclick = function() {
+        fileInput.click();
+    }
+
+    fileInput.onchange = function(e) {
+        e.preventDefault();
+        this.className = 'upload-drop-zone';
+
+        fileInput.files = e.dataTransfer.files;
+
+        var reader = new FileReader();
+    
+        reader.onload = function() {
+            preview.src = reader.result;
+            preview.style.display = 'block';
+            text.style.display = 'none';
+        }
+    
+        if (fileInput.files[0]) {
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+
+    }
+
     dropZone.ondrop = function(e) {
         e.preventDefault();
         this.className = 'upload-drop-zone';

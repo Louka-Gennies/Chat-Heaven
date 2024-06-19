@@ -21,6 +21,13 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	session, _ := store.Get(r, "session")
+	actualUsername, ok := session.Values["username"]
+	if !ok {
+		http.Error(w, "User not logged in", http.StatusUnauthorized)
+		return
+	}
+
 	if r.Method == "GET" {
 		var email, profilePicture, createdAt, first_name, last_name string
 		query := `SELECT email, profile_picture, first_name, last_name, createdAt FROM users WHERE username = ?`
@@ -30,32 +37,63 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		data := struct {
-			Username       string
-			Email          string
-			ProfilePicture string
-			FirstName      string
-			LastName       string
-			Posts          []Post
-			Topics         []Topic
-			CreatedAt      string
-		}{
-			Username:       username,
-			Email:          email,
-			ProfilePicture: profilePicture,
-			FirstName:      first_name,
-			LastName:       last_name,
-			Posts:          getPostsByUser(username),
-			Topics:         getTopicByUser(username),
-			CreatedAt:      createdAt,
+		var data interface{}
+
+		if username != actualUsername {
+
+			data = struct {
+				Username       string
+				Email          string
+				ProfilePicture string
+				FirstName      string
+				LastName       string
+				Posts          []Post
+				Topics         []Topic
+				CreatedAt      string
+				ActualUser     bool
+			}{
+				Username:       username,
+				Email:          email,
+				ProfilePicture: profilePicture,
+				FirstName:      first_name,
+				LastName:       last_name,
+				Posts:          getPostsByUser(username),
+				Topics:         getTopicByUser(username),
+				CreatedAt:      createdAt,
+				ActualUser:     false,
+			}
+		} else {
+			data = struct {
+				Username       string
+				Email          string
+				ProfilePicture string
+				FirstName      string
+				LastName       string
+				Posts          []Post
+				Topics         []Topic
+				CreatedAt      string
+				ActualUser     bool
+			}{
+				Username:       username,
+				Email:          email,
+				ProfilePicture: profilePicture,
+				FirstName:      first_name,
+				LastName:       last_name,
+				Posts:          getPostsByUser(username),
+				Topics:         getTopicByUser(username),
+				CreatedAt:      createdAt,
+				ActualUser:     true,
+			}
 		}
 
 		tmpl, err := template.ParseFiles("templates/user.html")
 		if err != nil {
+			fmt.Println(err)
 			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
 			return
 		}
 		tmpl.Execute(w, data)
+
 	} else if r.Method == "POST" {
 		file, handler, err := r.FormFile("profile_picture")
 		if err != nil {
