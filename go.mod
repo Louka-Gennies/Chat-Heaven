@@ -1,6 +1,6 @@
 module chatHeaven
 
-go 1.22.3
+go 1.22
 
 require (
 	github.com/gorilla/sessions v1.2.2
