@@ -140,11 +140,11 @@ main {
 }
 
 .tab :first-child {
-    background-color: #1EE592;
+    background-color: #6bf7bc;
 }
 
 .tab :first-child:hover {
-    background-color: #1ad98b;
+    background-color: #84f5c6;
 }
 
 .tab :first-child.active {
@@ -152,11 +152,11 @@ main {
 }
 
 .tab :nth-child(2) {
-    background-color: #33CCFF;
+    background-color: #7ddeff;
 }
 
 .tab :nth-child(2):hover {
-    background-color: #2ab9e8;
+    background-color: #65c0df;
 }
 
 .tab :nth-child(2).active {
@@ -164,17 +164,16 @@ main {
 }
 
 .tab :nth-child(3) {
-    background-color: #963EFF;
+    background-color: #b974f5;
 }
 
 .tab :nth-child(3):hover {
-    background-color: #8d2de3;
+    background-color: #bb7af5;
 }
 
 .tab :nth-child(3).active {
-    background-color: #963EFF;
+    background-color: #a55bff;
 }
-
 
 .tabcontent {
     display: none;
@@ -182,4 +181,244 @@ main {
     border-top: none;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
+}
+
+#Tab1 {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+#Tab1 h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+#Tab1 .actual p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+#Tab1 .update {
+    margin-top: 20px;
+}
+
+#Tab1 .update form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#Tab1 .update label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+#Tab1 .update input[type="text"] {
+    width: calc(30% - 20px);
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+#Tab1 .update input[type="submit"] {
+    background-color: #1EE592;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#Tab1 .update input[type="submit"]:hover {
+    background-color: #1ad98b;
+}
+
+.posts {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 20px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #f1f1f1;
+}
+
+.posts td {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.posts tr:hover {
+    background-color: #f0f0f0;
+}
+
+.posts a {
+    color: #333;
+    text-decoration: none;
+}
+
+.posts a:hover {
+    color: #007BFF;
+}
+
+.posts .post-container {
+    display: flex;
+    align-items: center;
+}
+
+.posts .post-title {
+    margin-left: 10px;
+}
+
+.posts .likes{
+    text-align: center;
+}
+
+.posts .dislikes{
+    text-align: center;
+}
+
+.posts .comments{
+    text-align: center;
+}
+
+.posts .table-author p {
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+}
+
+.posts .table-author a{
+    margin-left: 1%;
+    color: #00A5FF;
+    text-decoration: none;
+}
+
+.posts .table-author a:hover {
+    text-decoration: underline;
+}
+
+.posts .table-author span {
+    color: #949A9E;
+}
+
+.topics {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 20px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #f1f1f1;
+}
+
+.topics th, .topics td {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+}
+
+.topics tr:hover {
+    background-color: #f0f0f0;
+}
+
+.topics a {
+    color: #333;
+    text-decoration: none;
+}
+
+.topics a:hover {
+    color: #007BFF;
+}
+
+.topics .topic-container {
+    display: flex;
+    align-items: center;
+}
+
+.topics .topic-title {
+    margin-left: 10px;
+}
+
+.topics .nb-post-tab,
+.topics .last-post-tab {
+    text-align: center;
+}
+
+.topics .last-post-tab p {
+    margin: 0;
+}
+
+.topics .last-post-tab a {
+    margin-left: 5px;
+    color: #00A5FF;
+    text-decoration: none;
+}
+
+.topics .last-post-tab a:hover {
+    text-decoration: underline;
+}
+
+.topics .last-post-tab svg {
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.topics .last-post-date {
+    color: #949A9E;
+    font-size: 14px;
+}
+
+
+
+footer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 10%;
+    width: 100%;
+    gap: 50px;
+    position: fixed;
+    bottom: 0;
+}
+
+.home-button svg {
+    width: 50px;
+    height: 50px;
+    vertical-align: middle;
+    transition: 0.3s;
+}
+
+.home-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.home-button:hover svg{
+    fill: #33CCFF;
+}
+
+.logout-button svg {
+    width: 50px;
+    height: 50px;
+    vertical-align: middle;
+    transition: 0.3s;
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.logout-button:hover svg{
+    fill: #ff0000;
 }

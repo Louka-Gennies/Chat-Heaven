@@ -76,7 +76,7 @@ main {
 
 .button-container {
     display: flex;
-    justify-content: space-between; !important;
+    justify-content: space-between !important;
     margin-top: 20px;
 }
 

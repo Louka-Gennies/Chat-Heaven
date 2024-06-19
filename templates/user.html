@@ -58,29 +58,108 @@
                     </div>
 
                     <div id="Tab2" class="tabcontent">
-                        <h3>Posts</h3>
-                        {{range .Posts}}
-                        <div class="post">
-                            <a href="/post-content?postID={{.ID}}" class="post-title"><h3>{{.Title}}</h3></a>
-                            <p>{{.Content}}</p>
-                            <form action="/delete-post?post={{.Title}}&user={{.User}}" method="POST">
-                                <input type="submit" value="Delete">
-                            </form>
+                        <div class="posts">
+                            <table>
+                                <tr>
+                                    <th class="tab-post">Post</th>
+                                    <th class="author">Author</th>
+                                    <th class="post-likes">Votes</th>
+                                    <th class="post-comments">Comments</th>
+                                </tr>
+                                {{range .Posts}}
+                                <tr>
+                                    <td>
+                                        <div class="post-container">
+                                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+                                                width="47.000000pt" height="42.000000pt" viewBox="0 0 47.000000 42.000000"
+                                                preserveAspectRatio="xMidYMid meet">
+                    
+                                                <g transform="translate(0.000000,42.000000) scale(0.100000,-0.100000)"
+                                                fill="#000000" stroke="none">
+                                                <path d="M154 287 c-2 -7 -4 -52 -2 -98 l3 -84 85 0 85 0 0 95 0 95 -83 3
+                                                c-63 2 -84 0 -88 -11z m156 -87 l0 -80 -70 0 -70 0 0 80 0 80 70 0 70 0 0 -80z"/>
+                                                <path d="M190 240 c0 -5 11 -10 25 -10 14 0 25 5 25 10 0 6 -11 10 -25 10 -14
+                                                0 -25 -4 -25 -10z"/>
+                                                <path d="M190 200 c0 -5 23 -10 50 -10 28 0 50 5 50 10 0 6 -22 10 -50 10 -27
+                                                0 -50 -4 -50 -10z"/>
+                                                <path d="M190 160 c0 -5 23 -10 50 -10 28 0 50 5 50 10 0 6 -22 10 -50 10 -27
+                                                0 -50 -4 -50 -10z"/>
+                                                </g>
+                                            </svg>
+                                            <a href="/post-content?postID={{.ID}}" class="post-title"><h3>{{.Title}}</h3></a>
+                                        </div>
+                                    </td>
+                                    <td class = "table-author">
+                                        <p> By
+                                            <a href="/user?username={{.User}}">{{.User}} </a>
+                                        </p>
+                                        <span class ="post-date"> {{.Date}}</span>
+                                    </td>
+                                    <td class = "likes">{{.LikeDislikeDifference}}</td>
+                                    <td class = "comments">{{.NbComments}}</td>
+                                </tr>
+                                {{end}}
+                            </table>
                         </div>
-                        {{end}}
                     </div>
 
                     <div id="Tab3" class="tabcontent">
-                        <h3>Topics</h3>
-                        {{range .Topics}}
-                        <div class="topic">
-                            <a href="/posts?topic={{.Title}}">{{.Title}}</a>
-                            <p>{{.Description}}</p>
-                            <form action="/delete-topic?topic={{.Title}}&user={{.User}}" method="POST">
-                                <input type="submit" value="Delete">
-                            </form>
-                        </div>
-                        {{end}}
+                        <div class="topics">
+                            <table>
+                                <tr>
+                                    <th class="tab-forum">Forum</th>
+                                    <th class="nb-post">Posts</th>
+                                    <th class="last-post">Last Post</th>
+                                </tr>
+                                {{range .Topics}}
+                                <tr>
+                                    <td>
+                                        <div class="topic-container">
+                                            <svg width="87" height="81" viewBox="0 0 87 81" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <g clip-path="url(#clip0_44_132)">
+                                                    <path d="M87 0H0V81H87V0Z" fill="#f1f1f1"/> <!-- Changed to gray -->
+                                                    <path d="M43.5 81C67.5244 81 87 62.8675 87 40.5C87 18.1325 67.5244 0 43.5 0C19.4756 0 0 18.1325 0 40.5C0 62.8675 19.4756 81 43.5 81Z" fill="#FFCC99"/>
+                                                    <path d="M18.4736 58.4198C21.7883 62.1276 27.2943 64.2305 32.4217 64.2305H46.199C53.3555 64.2305 59.4726 59.8044 59.4726 52.8398C59.4726 46.5913 54.0351 40.8164 46.8316 40.8164H32.9841C26.3766 40.8164 21.175 46.0886 21.175 52.207V54.5973C21.175 55.4434 20.8938 56.1594 20.4018 56.6801C19.9869 57.1123 19.4573 57.4027 18.8129 57.5254C18.3632 57.6109 18.2259 58.1428 18.4736 58.4198Z" fill="#D5ACFF" stroke="black" stroke-width="3" stroke-miterlimit="10"/>
+                                                    <path d="M40.2063 54.4219C39.2678 54.4219 38.5071 53.7136 38.5071 52.8398C38.5071 51.9661 39.2678 51.2578 40.2063 51.2578C41.1447 51.2578 41.9055 51.9661 41.9055 52.8398C41.9055 53.7136 41.1447 54.4219 40.2063 54.4219Z" fill="black"/>
+                                                    <path d="M48.3625 54.4219C47.424 54.4219 46.6633 53.7136 46.6633 52.8398C46.6633 51.9661 47.424 51.2578 48.3625 51.2578C49.301 51.2578 50.0618 51.9661 50.0618 52.8398C50.0618 53.7136 49.301 54.4219 48.3625 54.4219Z" fill="black"/>
+                                                    <path d="M32.05 54.4219C31.1115 54.4219 30.3508 53.7136 30.3508 52.8398C30.3508 51.9661 31.1115 51.2578 32.05 51.2578C32.9885 51.2578 33.7493 51.9661 33.7493 52.8398C33.7493 53.7136 32.9885 54.4219 32.05 54.4219Z" fill="black"/>
+                                                    <path d="M69.2058 35.0057C65.8914 38.7135 60.3854 40.8164 55.258 40.8164H41.4806C34.3242 40.8164 28.207 36.3903 28.207 29.4258C28.207 23.1772 33.6445 17.4023 40.8481 17.4023H54.6956C61.3031 17.4023 66.5047 22.6746 66.5047 28.793V31.1832C66.5047 32.0294 66.7859 32.7453 67.2779 33.2661C67.6928 33.6982 68.2223 33.9887 68.8666 34.1113C69.3166 34.1969 69.4539 34.7287 69.2058 35.0057Z" fill="#33CCFF" stroke="black" stroke-width="3" stroke-miterlimit="10"/>
+                                                    <path d="M47.4734 31.0078C48.4119 31.0078 49.1726 30.2995 49.1726 29.4258C49.1726 28.5521 48.4119 27.8438 47.4734 27.8438C46.5349 27.8438 45.7742 28.5521 45.7742 29.4258C45.7742 30.2995 46.5349 31.0078 47.4734 31.0078Z" fill="black"/>
+                                                    <path d="M39.3171 31.0078C40.2557 31.0078 41.0164 30.2995 41.0164 29.4258C41.0164 28.5521 40.2557 27.8438 39.3171 27.8438C38.3787 27.8438 37.6179 28.5521 37.6179 29.4258C37.6179 30.2995 38.3787 31.0078 39.3171 31.0078Z" fill="black"/>
+                                                    <path d="M55.6296 31.0078C56.5682 31.0078 57.3289 30.2995 57.3289 29.4258C57.3289 28.5521 56.5682 27.8438 55.6296 27.8438C54.6912 27.8438 53.9304 28.5521 53.9304 29.4258C53.9304 30.2995 54.6912 31.0078 55.6296 31.0078Z" fill="black"/>
+                                                </g>
+                                                <defs>
+                                                    <clipPath id="clip0_44_132">
+                                                        <rect width="87" height="81" fill="white"/>
+                                                    </clipPath>
+                                                </defs>
+                                            </svg>
+                                            <a href="posts?topic={{.Title}}" class="topic-title">
+                                                <h3>{{.Title}}</h3>
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td class="nb-post-tab">{{.NbPosts}}</td>
+                                    <td class="last-post-tab">
+                                        {{ if .LastPost }}
+                                            <p>{{.LastPost.Title}} by
+                                                <a href="/user?username={{.LastPost.Author}}">{{.LastPost.Author}}</a>
+                                                <a href="/post-content?postID={{.LastPost.ID}}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                                                        <title>Go to last post</title>
+                                                        <path d="M640-280l-57-56 184-184-184-184 57-56 240 240-240 240ZM80-200v-160q0-83 58.5-141.5T280-560h247L383-704l57-56 240 240-240 240-57-56 144-144H280q-50 0-85 35t-35 85v160H80Z"/>
+                                                    </svg>
+                                                </a>
+                                            </p>
+                                            <span class="last-post-date">{{.LastPost.Date}}</span>
+                                        {{ else }}
+                                            <p>No posts yet</p>
+                                        {{ end }}
+                                    </td>
+                                </tr>
+                                {{ end }}
+                            </table>
+                        </div>                        
                     </div>
                 </div>
         {{else}}
@@ -96,37 +175,132 @@
             </div>
             <div class="information">
                 <div class="tab">
-                    <button class="tablinks" onclick="openTab(event, 'Tab1')">Posts</button>
-                    <button class="tablinks" onclick="openTab(event, 'Tab2')">Topics</button>
-                </div>
-
-                <div id="Tab1" class="tabcontent">
-                    <h3>Posts</h3>
-                    {{range .Posts}}
-                    <div class="post">
-                        <a href="/post-content?postID={{.ID}}" class="post-title"><h3>{{.Title}}</h3></a>
-                        <p>{{.Content}}</p>
-                    </div>
-                    {{end}}
+                    <button class="tablinks" onclick="openTab(event, 'Tab2')">Posts</button>
+                    <button class="tablinks" onclick="openTab(event, 'Tab3')">Topics</button>
                 </div>
 
                 <div id="Tab2" class="tabcontent">
-                    <h3>Topics</h3>
-                    {{range .Topics}}
-                    <div class="topic">
-                        <a href="/posts?topic={{.Title}}">{{.Title}}</a>
-                        <p>{{.Description}}</p>
+                    <div class="posts">
+                        <table>
+                            <tr>
+                                <th class="tab-post">Post</th>
+                                <th class="author">Author</th>
+                                <th class="post-likes">Votes</th>
+                                <th class="post-comments">Comments</th>
+                            </tr>
+                            {{range .Posts}}
+                            <tr>
+                                <td>
+                                    <div class="post-container">
+                                        <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+                                            width="47.000000pt" height="42.000000pt" viewBox="0 0 47.000000 42.000000"
+                                            preserveAspectRatio="xMidYMid meet">
+                
+                                            <g transform="translate(0.000000,42.000000) scale(0.100000,-0.100000)"
+                                            fill="#000000" stroke="none">
+                                            <path d="M154 287 c-2 -7 -4 -52 -2 -98 l3 -84 85 0 85 0 0 95 0 95 -83 3
+                                            c-63 2 -84 0 -88 -11z m156 -87 l0 -80 -70 0 -70 0 0 80 0 80 70 0 70 0 0 -80z"/>
+                                            <path d="M190 240 c0 -5 11 -10 25 -10 14 0 25 5 25 10 0 6 -11 10 -25 10 -14
+                                            0 -25 -4 -25 -10z"/>
+                                            <path d="M190 200 c0 -5 23 -10 50 -10 28 0 50 5 50 10 0 6 -22 10 -50 10 -27
+                                            0 -50 -4 -50 -10z"/>
+                                            <path d="M190 160 c0 -5 23 -10 50 -10 28 0 50 5 50 10 0 6 -22 10 -50 10 -27
+                                            0 -50 -4 -50 -10z"/>
+                                            </g>
+                                        </svg>
+                                        <a href="/post-content?postID={{.ID}}" class="post-title"><h3>{{.Title}}</h3></a>
+                                    </div>
+                                </td>
+                                <td class = "table-author">
+                                    <p> By
+                                        <a href="/user?username={{.User}}">{{.User}} </a>
+                                    </p>
+                                    <span class ="post-date"> {{.Date}}</span>
+                                </td>
+                                <td class = "likes">{{.LikeDislikeDifference}}</td>
+                                <td class = "comments">{{.NbComments}}</td>
+                            </tr>
+                            {{end}}
+                        </table>
                     </div>
-                    {{end}}
                 </div>
+
+                <div id="Tab3" class="tabcontent">
+                    <div class="topics">
+                        <table>
+                            <tr>
+                                <th class="tab-forum">Forum</th>
+                                <th class="nb-post">Posts</th>
+                                <th class="last-post">Last Post</th>
+                            </tr>
+                            {{range .Topics}}
+                            <tr>
+                                <td>
+                                    <div class="topic-container">
+                                        <svg width="87" height="81" viewBox="0 0 87 81" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <g clip-path="url(#clip0_44_132)">
+                                                <path d="M87 0H0V81H87V0Z" fill="#f1f1f1"/> <!-- Changed to gray -->
+                                                <path d="M43.5 81C67.5244 81 87 62.8675 87 40.5C87 18.1325 67.5244 0 43.5 0C19.4756 0 0 18.1325 0 40.5C0 62.8675 19.4756 81 43.5 81Z" fill="#FFCC99"/>
+                                                <path d="M18.4736 58.4198C21.7883 62.1276 27.2943 64.2305 32.4217 64.2305H46.199C53.3555 64.2305 59.4726 59.8044 59.4726 52.8398C59.4726 46.5913 54.0351 40.8164 46.8316 40.8164H32.9841C26.3766 40.8164 21.175 46.0886 21.175 52.207V54.5973C21.175 55.4434 20.8938 56.1594 20.4018 56.6801C19.9869 57.1123 19.4573 57.4027 18.8129 57.5254C18.3632 57.6109 18.2259 58.1428 18.4736 58.4198Z" fill="#D5ACFF" stroke="black" stroke-width="3" stroke-miterlimit="10"/>
+                                                <path d="M40.2063 54.4219C39.2678 54.4219 38.5071 53.7136 38.5071 52.8398C38.5071 51.9661 39.2678 51.2578 40.2063 51.2578C41.1447 51.2578 41.9055 51.9661 41.9055 52.8398C41.9055 53.7136 41.1447 54.4219 40.2063 54.4219Z" fill="black"/>
+                                                <path d="M48.3625 54.4219C47.424 54.4219 46.6633 53.7136 46.6633 52.8398C46.6633 51.9661 47.424 51.2578 48.3625 51.2578C49.301 51.2578 50.0618 51.9661 50.0618 52.8398C50.0618 53.7136 49.301 54.4219 48.3625 54.4219Z" fill="black"/>
+                                                <path d="M32.05 54.4219C31.1115 54.4219 30.3508 53.7136 30.3508 52.8398C30.3508 51.9661 31.1115 51.2578 32.05 51.2578C32.9885 51.2578 33.7493 51.9661 33.7493 52.8398C33.7493 53.7136 32.9885 54.4219 32.05 54.4219Z" fill="black"/>
+                                                <path d="M69.2058 35.0057C65.8914 38.7135 60.3854 40.8164 55.258 40.8164H41.4806C34.3242 40.8164 28.207 36.3903 28.207 29.4258C28.207 23.1772 33.6445 17.4023 40.8481 17.4023H54.6956C61.3031 17.4023 66.5047 22.6746 66.5047 28.793V31.1832C66.5047 32.0294 66.7859 32.7453 67.2779 33.2661C67.6928 33.6982 68.2223 33.9887 68.8666 34.1113C69.3166 34.1969 69.4539 34.7287 69.2058 35.0057Z" fill="#33CCFF" stroke="black" stroke-width="3" stroke-miterlimit="10"/>
+                                                <path d="M47.4734 31.0078C48.4119 31.0078 49.1726 30.2995 49.1726 29.4258C49.1726 28.5521 48.4119 27.8438 47.4734 27.8438C46.5349 27.8438 45.7742 28.5521 45.7742 29.4258C45.7742 30.2995 46.5349 31.0078 47.4734 31.0078Z" fill="black"/>
+                                                <path d="M39.3171 31.0078C40.2557 31.0078 41.0164 30.2995 41.0164 29.4258C41.0164 28.5521 40.2557 27.8438 39.3171 27.8438C38.3787 27.8438 37.6179 28.5521 37.6179 29.4258C37.6179 30.2995 38.3787 31.0078 39.3171 31.0078Z" fill="black"/>
+                                                <path d="M55.6296 31.0078C56.5682 31.0078 57.3289 30.2995 57.3289 29.4258C57.3289 28.5521 56.5682 27.8438 55.6296 27.8438C54.6912 27.8438 53.9304 28.5521 53.9304 29.4258C53.9304 30.2995 54.6912 31.0078 55.6296 31.0078Z" fill="black"/>
+                                            </g>
+                                            <defs>
+                                                <clipPath id="clip0_44_132">
+                                                    <rect width="87" height="81" fill="white"/>
+                                                </clipPath>
+                                            </defs>
+                                        </svg>
+                                        <a href="posts?topic={{.Title}}" class="topic-title">
+                                            <h3>{{.Title}}</h3>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td class="nb-post-tab">{{.NbPosts}}</td>
+                                <td class="last-post-tab">
+                                    {{ if .LastPost }}
+                                        <p>{{.LastPost.Title}} by
+                                            <a href="/user?username={{.LastPost.Author}}">{{.LastPost.Author}}</a>
+                                            <a href="/post-content?postID={{.LastPost.ID}}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                                                    <title>Go to last post</title>
+                                                    <path d="M640-280l-57-56 184-184-184-184 57-56 240 240-240 240ZM80-200v-160q0-83 58.5-141.5T280-560h247L383-704l57-56 240 240-240 240-57-56 144-144H280q-50 0-85 35t-35 85v160H80Z"/>
+                                                </svg>
+                                            </a>
+                                        </p>
+                                        <span class="last-post-date">{{.LastPost.Date}}</span>
+                                    {{ else }}
+                                        <p>No posts yet</p>
+                                    {{ end }}
+                                </td>
+                            </tr>
+                            {{ end }}
+                        </table>
+                    </div>        
+                </div>
+                
             </div>
         {{end}}
     </main>
-    <a href="/">Back to home</a>
-    <br>
-    <form action="/logout" method="POST" style="display: inline;">
-        <input type="submit" value="Log out">
-    </form>
+    <footer>
+        <a href="/" class="home-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1792 1792" id="home">
+                <path d="M1472 992v480q0 26-19 45t-45 19h-384v-384H768v384H384q-26 0-45-19t-19-45V992q0-1 .5-3t.5-3l575-474 575 474q1 2 1 6zm223-69-62 74q-8 9-21 11h-3q-13 0-21-7L896 424l-692 577q-12 8-24 7-13-2-21-11l-62-74q-8-10-7-23.5t11-21.5l719-599q32-26 76-26t76 26l244 204V288q0-14 9-23t23-9h192q14 0 23 9t9 23v408l219 182q10 8 11 21.5t-7 23.5z"/>
+            </svg>
+        </a>
+        <form action="/logout" method="POST" style="display: inline;">
+            <button type="submit" class="logout-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="logout">
+                    <path d="M4,12a1,1,0,0,0,1,1h7.59l-2.3,2.29a1,1,0,0,0,0,1.42,1,1,0,0,0,1.42,0l4-4a1,1,0,0,0,.21-.33,1,1,0,0,0,0-.76,1,1,0,0,0-.21-.33l-4-4a1,1,0,1,0-1.42,1.42L12.59,11H5A1,1,0,0,0,4,12ZM17,2H7A3,3,0,0,0,4,5V8A1,1,0,0,0,6,8V5A1,1,0,0,1,7,4H17a1,1,0,0,1,1,1V19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V16a1,1,0,0,0-2,0v3a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V5A3,3,0,0,0,17,2Z"/>
+                </svg>
+            </button>
+        </form>
+    </footer>
     <script src="../static/js/dragAndDropImg.js"></script>
     <script src="../static/js/tabs.js"></script>
 </body>
