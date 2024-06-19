@@ -19,7 +19,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 		err := addUser(username, email, password, "./static/uploads/blank-pfp.png", date)
 		if err != nil {
-			http.Error(w, "Error during registration", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 
@@ -34,7 +34,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/register.html")
 	if err != nil {
-		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 	tmpl.Execute(w, nil)
@@ -50,7 +50,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		err := verifyUser(username, password)
 		if err != nil {
-			http.Error(w, "Incorrect username or password", http.StatusUnauthorized)
+			ErrorHandler(w, r)
 			return
 		}
 

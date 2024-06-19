@@ -12,13 +12,13 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 	openDB()
 	postTitle := r.URL.Query().Get("post")
 	if postTitle == "" {
-		http.Error(w, "Post not specified", http.StatusBadRequest)
+		ErrorHandler(w, r)
 		return
 	}
 
 	_, err := db.ExecContext(context.Background(), "DELETE FROM posts WHERE title = ?", postTitle)
 	if err != nil {
-		http.Error(w, "Error deleting the post", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 
@@ -31,13 +31,13 @@ func DeleteTopic(w http.ResponseWriter, r *http.Request) {
 	openDB()
 	topicTitle := r.URL.Query().Get("topic")
 	if topicTitle == "" {
-		http.Error(w, "Topic not specified", http.StatusBadRequest)
+		ErrorHandler(w, r)
 		return
 	}
 
 	_, err := db.ExecContext(context.Background(), "DELETE FROM topics WHERE title = ?", topicTitle)
 	if err != nil {
-		http.Error(w, "Error deleting the topic", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 

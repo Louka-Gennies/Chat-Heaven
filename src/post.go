@@ -20,43 +20,57 @@ func PostsHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
-		tmpl, err := template.ParseFiles("templates/home.html")
+		tmpl, err := template.ParseFiles("templates/post.html")
 		if err != nil {
-			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
-		tmpl.Execute(w, nil)
-		return
-	}
 
-	var profilePicture string
-	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
-	if err != nil {
-		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
-		return
-	}
+		data := struct {
+			Topic            string
+			TopicDescription string
+			Post             []Post
+			Username         interface{}
+			ProfilePicture   interface{}
+		}{
+			Topic:            topic,
+			TopicDescription: getTopicDescription(topic),
+			Post:             Posts,
+			Username:         nil,
+			ProfilePicture:   nil,
+		}
 
-	tmpl, err := template.ParseFiles("templates/post.html")
-	if err != nil {
-		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
-		return
-	}
+		tmpl.Execute(w, data)
+	} else {
+		var profilePicture string
+		err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+		if err != nil {
+			ErrorHandler(w, r)
+			return
+		}
 
-	data := struct {
-		Topic            string
-		TopicDescription string
-		Post             []Post
-		Username         string
-		ProfilePicture   string
-	}{
-		Topic:            topic,
-		TopicDescription: getTopicDescription(topic),
-		Post:             Posts,
-		Username:         username.(string),
-		ProfilePicture:   profilePicture,
-	}
+		tmpl, err := template.ParseFiles("templates/post.html")
+		if err != nil {
+			ErrorHandler(w, r)
+			return
+		}
 
-	tmpl.Execute(w, data)
+		data := struct {
+			Topic            string
+			TopicDescription string
+			Post             []Post
+			Username         string
+			ProfilePicture   string
+		}{
+			Topic:            topic,
+			TopicDescription: getTopicDescription(topic),
+			Post:             Posts,
+			Username:         username.(string),
+			ProfilePicture:   profilePicture,
+		}
+
+		tmpl.Execute(w, data)
+	}
 }
 
 func CreatePost(w http.ResponseWriter, r *http.Request) {
@@ -64,25 +78,20 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
-		tmpl, err := template.ParseFiles("templates/home.html")
-		if err != nil {
-			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
-			return
-		}
-		tmpl.Execute(w, nil)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
 	var profilePicture string
 	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
 	if err != nil {
-		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 
 	tmpl, err := template.ParseFiles("templates/create-post.html")
 	if err != nil {
-		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 
@@ -106,7 +115,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 		file, handler, err := r.FormFile("picture")
 		if err != nil {
-			http.Error(w, "Error during file upload", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		defer file.Close()
@@ -116,7 +125,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		filePath := "uploads/" + handler.Filename
 		f, err := os.Create(filePath)
 		if err != nil {
-			http.Error(w, "Error saving the file", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		defer f.Close()
@@ -128,7 +137,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err = db.ExecContext(context.Background(), "INSERT INTO posts (user, title, content, picture, topic, date) VALUES (?, ?, ?, ?, ?, ?)", username, title, content, filePath, topicTitle, date)
 		if err != nil {
-			http.Error(w, "Error posting the message", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		http.Redirect(w, r, fmt.Sprintf("/posts?topic=%s", topic), http.StatusSeeOther)
