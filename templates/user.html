@@ -10,7 +10,6 @@
 <body>
     <main>
         {{if .ActualUser}}
-            <div class ="main-card">
                 <div class="card">
                     <div class="pfp">
                         {{if .ProfilePicture}}
@@ -26,11 +25,9 @@
                             <img id="preview" src="" alt="Image preview" style="width:150px;height:150px;">
                         </div>
                         <br>
-                        <input type="submit" value="Upload">
+                        <input class="upload-button" type="submit" value="Upload">
                     </form>
                 </div>
-            </div>
-            <div class ="main-information">
                 <div class="information">
                         <div class="tab">
                             <button class="tablinks" onclick="openTab(event, 'Tab1')">Personal Info</button>
@@ -86,9 +83,7 @@
                         {{end}}
                     </div>
                 </div>
-            </div>
         {{else}}
-        <div class ="main-card">
             <div class="card">
                 <div class="pfp">
                     {{if .ProfilePicture}}
@@ -99,8 +94,6 @@
                 <p class="email">{{.Email}}</p>
                 <p class="date">Create the {{.CreatedAt}}</p>
             </div>
-        </div>
-        <div class ="main-information">
             <div class="information">
                 <div class="tab">
                     <button class="tablinks" onclick="openTab(event, 'Tab1')">Posts</button>
@@ -127,7 +120,6 @@
                     {{end}}
                 </div>
             </div>
-        </div>
         {{end}}
     </main>
     <a href="/">Back to home</a>
