@@ -24,22 +24,32 @@ main {
     gap: 20px;
 }
 
-.card {
-    height: 80%;
+.main-card{
+    margin-top: 5%;
     width: 30%;
+    height: 75%;
+    overflow: hidden;
+    border-radius: 8px;
+    padding: 24px;
+    background-color: #E6F7FF;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    width: 96.5%;
+    height: 96.5%;
     border-radius: 20px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-    margin-top: 5%;
+    padding: 8px 16px 16px 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: rgb(238, 238, 238);
+    background-color: #E6F7FF;
 }
 
 .card .pfp {
     display: flex;
-    margin-top: -300px;
 }
 
 .card .pfp img {
@@ -90,20 +100,30 @@ main {
     border-radius: 20px;
 }
 
-.information {
-    height: 80%;
-    width: 60%;
-    border-radius: 20px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+.main-information {
     margin-top: 5%;
-    background-color: rgb(238, 238, 238);
+    height: 75%;
+    width: 55%;
+    overflow: hidden;
+    border-radius: 8px;
+    padding: 24px;
+    background-color: #E6F7FF;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.information {
+    height: 96.5%;
+    width: 96.5%;
+    border-radius: 20px;
+    padding: 8px 16px 16px 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #dff4fd;
 }
 
 
 .tab {
     overflow: hidden;
-    border: 1px solid #ccc;
-    background-color: #f1f1f1;
+    background-color: #E6F7FF;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
 }
@@ -119,18 +139,46 @@ main {
     font-size: 17px;
 }
 
-.tab button:hover {
-    background-color: #ddd;
+.tab :first-child {
+    background-color: #1EE592;
 }
 
-.tab button.active {
-    background-color: #ccc;
+.tab :first-child:hover {
+    background-color: #1ad98b;
 }
+
+.tab :first-child.active {
+    background-color: #1EE592;
+}
+
+.tab :nth-child(2) {
+    background-color: #33CCFF;
+}
+
+.tab :nth-child(2):hover {
+    background-color: #2ab9e8;
+}
+
+.tab :nth-child(2).active {
+    background-color: #33CCFF;
+}
+
+.tab :nth-child(3) {
+    background-color: #963EFF;
+}
+
+.tab :nth-child(3):hover {
+    background-color: #8d2de3;
+}
+
+.tab :nth-child(3).active {
+    background-color: #963EFF;
+}
+
 
 .tabcontent {
     display: none;
     padding: 6px 12px;
-    border: 1px solid #ccc;
     border-top: none;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;

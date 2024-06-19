@@ -43,3 +43,13 @@ type Result struct {
 	Type  string `json:"type"`
 	Value string `json:"value"`
 }
+
+type User struct {
+	Username       string
+	Email          string
+	FirstName      string
+	LastName       string
+	ProfilePicture string
+	LastPost       *LastPost
+	TotalLikes     int
+}

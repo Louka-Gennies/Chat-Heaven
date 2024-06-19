@@ -76,12 +76,40 @@ main {
 
 .button-container {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between; !important;
     margin-top: 20px;
 }
 
+.sort-buttons {
+    display: flex;
+    gap : 10px;
+    margin-bottom: 20px;
+}
+
+.sort-button {
+    background-color: #33CCFF;
+    border-radius: 5px;
+    border: none;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    color : white;
+    transition: background-color 0.3s;
+}
+
+.sort-button:hover {
+    background-color: #28bdf1;
+}
+
+.sort-button.active {
+    background-color: #0056b3;
+}
+
 .create-post {
-    height: 15px;
+    height: 20px;
     background-color: #33CCFF;
     padding: 10px 10px;
     border-radius: 5px;
@@ -89,11 +117,13 @@ main {
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
+    font-weight: bold;
+    color : white;
     transition: background-color 0.3s;
 }
 
 .create-post:hover {
-    background-color: #0056b3;
+    background-color: #28bdf1;
 }
 
 
@@ -134,4 +164,25 @@ main {
 
 .comments{
     text-align: center;
+}
+
+.table-author p {
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+}
+
+.table-author a{
+    margin-left: 1%;
+    color: #00A5FF;
+    text-decoration: none;
+}
+
+.table-author a:hover {
+    text-decoration: underline;
+}
+
+.table-author span {
+    color: #949A9E;
 }

@@ -28,7 +28,7 @@ func getTopics(nbOfTopics int) []Topic {
 			if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
 				return nil
 			}
-			topic.NbPosts = len(getPosts(topic.Title))
+			topic.NbPosts = len(getPosts(topic.Title, ""))
 			topic.LastPost = getLastPost(topic.Title)
 			topics = append(topics, topic)
 			i++
@@ -47,7 +47,7 @@ func getTopics(nbOfTopics int) []Topic {
 			if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
 				return nil
 			}
-			topic.NbPosts = len(getPosts(topic.Title))
+			topic.NbPosts = len(getPosts(topic.Title, ""))
 			topic.LastPost = getLastPost(topic.Title)
 			topics = append(topics, topic)
 		}
@@ -55,7 +55,7 @@ func getTopics(nbOfTopics int) []Topic {
 	}
 }
 
-func getPosts(topicTitle string, nbOfPosts ...int) []Post {
+func getPosts(topicTitle string, sortBy string, nbOfPosts ...int) []Post {
 	var rows *sql.Rows
 	var err error
 
@@ -83,9 +83,23 @@ func getPosts(topicTitle string, nbOfPosts ...int) []Post {
 		}
 		post.Likes = likeCount(post.ID)
 		post.Dislikes = dislikeCount(post.ID)
+		post.LikeDislikeDifference = post.Likes - post.Dislikes
 		post.NbComments = len(getComment(post.Title))
 		post.Date = getDatePost(post.ID)
 		posts = append(posts, post)
+	}
+	if sortBy == "" {
+		return posts
+	}
+	switch sortBy {
+	case "likes":
+		posts = sortByLikes(posts)
+	case "comments":
+		posts = sortByComments(posts)
+	case "date":
+		posts = sortByDate(posts)
+	case "author":
+		posts = sortByAuthor(posts)
 	}
 	return posts
 }
@@ -188,4 +202,29 @@ func getLastPost(topic string) *LastPost {
 	}
 
 	return &lastPost
+}
+
+func getLastPostFromUser(username string) *LastPost {
+	var title string
+	err := db.QueryRowContext(context.Background(), "SELECT title FROM posts WHERE user = ? ORDER BY id DESC LIMIT 1", username).Scan(&title)
+	if err != nil {
+		return nil
+	}
+
+	var lastPost LastPost
+	err = db.QueryRowContext(context.Background(), "SELECT title, user, date, id FROM posts WHERE title = ?", title).Scan(&lastPost.Title, &lastPost.Author, &lastPost.Date, &lastPost.ID)
+	if err != nil {
+		return nil
+	}
+
+	return &lastPost
+}
+
+func getTotalLikesFromUser(username string) int {
+	var totalLikes int
+	err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ?", username).Scan(&totalLikes)
+	if err != nil {
+		return 0
+	}
+	return totalLikes
 }

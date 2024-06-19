@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+html {
+    background-image: url(../img/home-background.svg);
+    background-position: bottom;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: Inter;
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+main {
+    margin-top: 5%;
+    width: 70%;
+}
+
+.users {
+    width: 100%;
+    margin-top: 20px;
+    overflow: hidden;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border : 1px solid #BEB5B5;
+    background-color: #ffffff;
+
+}
+
+.users tbody {
+    background-color: #ffffff;
+}
+
+.users table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+}
+
+.users th {
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: 550;
+    padding: 20px;
+    font-size: 24px;
+
+}
+
+.users td {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.tab-user {
+    border-collapse: collapse;
+    text-align: left;
+    width: 10%;
+}
+
+.tab-profile-picture {
+    width: 20%;
+    text-align: center;
+}
+
+.last-post {
+    width: 30%;
+    text-align: left;
+}
+
+.likes {
+    width: 10%;
+}
+
+.users td {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.users tr:hover {
+    background-color: #f0f0f0;
+}
+
+.users a {
+    color: #333;
+    text-decoration: none;
+}
+
+.users a:hover {
+    color: #007BFF;
+}
+
+.username-tab {
+    margin-left: 10px;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 0 2% !important;
+}
+
+.last-post-tab a{
+    margin-left: 1%;
+    color: #00A5FF;
+    text-decoration: none;
+}
+
+.last-post-tab {
+    text-align: left;
+}
+
+.last-post-tab p {
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+}
+
+.last-post-tab a{
+    margin-left: 1%;
+    color: #00A5FF;
+    text-decoration: none;
+}
+
+.last-post-tab a:hover {
+    text-decoration: underline;
+}
+
+.last-post-tab span {
+    color: #949A9E;
+}
+
+.go-to-last-post {
+    fill: black;
+}
+
+.img-users {
+    justify-content: center;
+    align-items: center;
+}
+
+.img-users img {
+    display: block;
+    margin: auto;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.img-users img:hover {
+    cursor: pointer;
+}
+
+.total-likes {
+    text-align: center;
+}

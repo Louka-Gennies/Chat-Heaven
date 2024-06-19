@@ -15,7 +15,8 @@ import (
 func PostsHandler(w http.ResponseWriter, r *http.Request) {
 	openDB()
 	topic := r.URL.Query().Get("topic")
-	Posts := getPosts(topic)
+	sort := r.URL.Query().Get("sort")
+	Posts := getPosts(topic, sort)
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {

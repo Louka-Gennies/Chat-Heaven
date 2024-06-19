@@ -88,7 +88,7 @@
                     <h3>Total Posts</h3>
                 </div>
             </div>
-            <div class="users">
+            <div class="users" onclick="location.href ='/users'">
                 <svg width="167" height="144" viewBox="0 0 167 144" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <g clip-path="url(#clip0_44_88)">
                         <mask id="mask0_44_88" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="-1" y="0" width="168" height="144">
@@ -159,7 +159,7 @@
                                 </defs>
                             </svg>
                             <a href="/posts?topic={{.Title}}">{{.Title}}</a>
-                        </div>                    
+                        </div>
                     </td>
                     <td class = "nb-post-tab">{{.NbPosts}}</td>
                     <td class = "last-post-tab">
@@ -173,10 +173,10 @@
                                     </svg>
                                 </a>
                             </p>
+                            <span class = "last-post-date">{{.LastPost.Date}}</span>
                         {{else}}
                             <p>No posts yet</p>
                         {{end}}
-                        <span class = "last-post-date">{{.LastPost.Date}}</span>
                     </td>
                 </tr>
                 {{end}}

@@ -37,7 +37,15 @@
 
     <h2>{{.Topic}}</h2>
     <h4>{{.TopicDescription}}</h4>
+
     <div class="button-container">
+        <div class ="sort-buttons">
+            <button class="sort-button" id="sort-likes" onclick="window.location.href='/posts?topic={{.Topic}}&sort=likes'">Sort by likes</button>
+            <button class="sort-button" id="sort-comments" onclick="window.location.href='/posts?topic={{.Topic}}&sort=comments'">Sort by comments</button>
+            <button class="sort-button" id="sort-date" onclick="window.location.href='/posts?topic={{.Topic}}&sort=date'">Sort by date</button>
+            <button class="sort-button" id="sort-author" onclick="window.location.href='/posts?topic={{.Topic}}&sort=author'">Sort by author</button>
+            <button class="sort-button" id="sort-title" onclick="window.location.href='/posts?topic={{.Topic}}'">Reset</button>
+        </div>
         <a href="/create-post?topic={{.Topic}}" class="create-post"> + New Post</a>
     </div>
     <div class="forum">
@@ -45,8 +53,7 @@
             <tr>
                 <th class="tab-post">Post</th>
                 <th class="author">Author</th>
-                <th class="post-likes">Likes</th>
-                <th class="post-dislikes">Dislikes</th>
+                <th class="post-likes">Votes</th>
                 <th class="post-comments">Comments</th>
             </tr>
             {{range .Post}}
@@ -72,9 +79,13 @@
                         <a href="/post-content?postID={{.ID}}" class="post-title"><h3>{{.Title}}</h3></a>
                     </div>
                 </td>
-                <td class = "table-author"><strong>By </strong>{{.User}}</td>
-                <td class = "likes">{{.Likes}}</td>
-                <td class = "dislikes">{{.Dislikes}}</td>
+                <td class = "table-author">
+                    <p> By
+                        <a href="/user?username={{.User}}">{{.User}} </a>
+                    </p>
+                    <span class ="post-date"> {{.Date}}</span>
+                </td>
+                <td class = "likes">{{.LikeDislikeDifference}}</td>
                 <td class = "comments">{{.NbComments}}</td>
             </tr>
             {{end}}
@@ -86,4 +97,15 @@
 </div>
 </body>
 <script src="../static/js/search-autocomplete.js"></script>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const sortParam = urlParams.get('sort');
+
+    if (sortParam) {
+        const activeButton = document.getElementById(`sort-${sortParam}`);
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
+    }
+</script>
 </html>
