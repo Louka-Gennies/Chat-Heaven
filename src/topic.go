@@ -14,58 +14,88 @@ func TopicsHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
-		tmpl, err := template.ParseFiles("templates/home.html")
+		rows, err := db.QueryContext(context.Background(), "SELECT title, description FROM topics")
 		if err != nil {
-			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
-		tmpl.Execute(w, nil)
-		return
-	}
+		defer rows.Close()
 
-	var profilePicture string
-	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
-	if err != nil {
-		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
-		return
-	}
-
-	rows, err := db.QueryContext(context.Background(), "SELECT title, description FROM topics")
-	if err != nil {
-		http.Error(w, "Error retrieving the messages", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	tmpl, err := template.ParseFiles("templates/topic.html")
-	if err != nil {
-		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
-		return
-	}
-
-	var Topics []Topic
-	for rows.Next() {
-		var topic Topic
-		if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
-			http.Error(w, "Error reading the messages", http.StatusInternalServerError)
+		tmpl, err := template.ParseFiles("templates/topic.html")
+		if err != nil {
+			ErrorHandler(w, r)
 			return
 		}
-		topic.NbPosts = len(getPosts(topic.Title, ""))
-		topic.LastPost = getLastPost(topic.Title)
-		Topics = append(Topics, topic)
-	}
 
-	data := struct {
-		Topic          []Topic
-		Username       string
-		ProfilePicture string
-	}{
-		Topic:          Topics,
-		Username:       username.(string),
-		ProfilePicture: profilePicture,
-	}
+		var Topics []Topic
+		for rows.Next() {
+			var topic Topic
+			if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
+				ErrorHandler(w, r)
+				return
+			}
+			topic.NbPosts = len(getPosts(topic.Title, ""))
+			topic.LastPost = getLastPost(topic.Title)
+			Topics = append(Topics, topic)
+		}
 
-	tmpl.Execute(w, data)
+		data := struct {
+			Topic          []Topic
+			Username       interface{}
+			ProfilePicture interface{}
+		}{
+			Topic:          Topics,
+			Username:       nil,
+			ProfilePicture: nil,
+		}
+
+		tmpl.Execute(w, data)
+
+	} else {
+		var profilePicture string
+		err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+		if err != nil {
+			ErrorHandler(w, r)
+			return
+		}
+
+		rows, err := db.QueryContext(context.Background(), "SELECT title, description FROM topics")
+		if err != nil {
+			ErrorHandler(w, r)
+			return
+		}
+		defer rows.Close()
+
+		tmpl, err := template.ParseFiles("templates/topic.html")
+		if err != nil {
+			ErrorHandler(w, r)
+			return
+		}
+
+		var Topics []Topic
+		for rows.Next() {
+			var topic Topic
+			if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
+				ErrorHandler(w, r)
+				return
+			}
+			topic.NbPosts = len(getPosts(topic.Title, ""))
+			topic.LastPost = getLastPost(topic.Title)
+			Topics = append(Topics, topic)
+		}
+
+		data := struct {
+			Topic          []Topic
+			Username       string
+			ProfilePicture string
+		}{
+			Topic:          Topics,
+			Username:       username.(string),
+			ProfilePicture: profilePicture,
+		}
+
+		tmpl.Execute(w, data)
+	}
 }
 
 func CreateTopic(w http.ResponseWriter, r *http.Request) {
@@ -73,25 +103,20 @@ func CreateTopic(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
-		tmpl, err := template.ParseFiles("templates/home.html")
-		if err != nil {
-			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
-			return
-		}
-		tmpl.Execute(w, nil)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
 	var profilePicture string
 	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
 	if err != nil {
-		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 
 	tmpl, err := template.ParseFiles("templates/create-topic.html")
 	if err != nil {
-		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 
@@ -106,12 +131,12 @@ func CreateTopic(w http.ResponseWriter, r *http.Request) {
 		date := time.Now().Format("02-01-2006 15:04")
 
 		if !ok {
-			http.Error(w, "You must be logged in to post a message", http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 		_, err := db.ExecContext(context.Background(), "INSERT INTO topics (user, title, description, date) VALUES (?, ?, ?, ?)", username, title, description, date)
 		if err != nil {
-			http.Error(w, "Error posting the message", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		http.Redirect(w, r, "/topics", http.StatusSeeOther)

@@ -11,56 +11,86 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
-		tmpl, err := template.ParseFiles("templates/home.html")
+		rows, err := db.QueryContext(context.Background(), "SELECT username, profile_picture FROM users")
 		if err != nil {
-			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
-		tmpl.Execute(w, nil)
-		return
-	}
+		defer rows.Close()
 
-	var profilePicture string
-	err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
-	if err != nil {
-		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
-		return
-	}
-
-	rows, err := db.QueryContext(context.Background(), "SELECT username, profile_picture FROM users")
-	if err != nil {
-		http.Error(w, "Error retrieving the messages", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	tmpl, err := template.ParseFiles("templates/users.html")
-	if err != nil {
-		http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
-		return
-	}
-
-	var Users []User
-	for rows.Next() {
-		var user User
-		if err := rows.Scan(&user.Username, &user.ProfilePicture); err != nil {
-			http.Error(w, "Error reading the messages", http.StatusInternalServerError)
+		tmpl, err := template.ParseFiles("templates/users.html")
+		if err != nil {
+			ErrorHandler(w, r)
 			return
 		}
-		user.LastPost = getLastPostFromUser(user.Username)
-		user.TotalLikes = getTotalLikesFromUser(user.Username)
-		Users = append(Users, user)
-	}
 
-	data := struct {
-		Users          []User
-		Username       string
-		ProfilePicture string
-	}{
-		Users,
-		username.(string),
-		profilePicture,
-	}
+		var Users []User
+		for rows.Next() {
+			var user User
+			if err := rows.Scan(&user.Username, &user.ProfilePicture); err != nil {
+				ErrorHandler(w, r)
+				return
+			}
+			user.LastPost = getLastPostFromUser(user.Username)
+			user.TotalLikes = getTotalLikesFromUser(user.Username)
+			Users = append(Users, user)
+		}
 
-	tmpl.Execute(w, data)
+		data := struct {
+			Users          []User
+			Username       interface{}
+			ProfilePicture interface{}
+		}{
+			Users,
+			nil,
+			nil,
+		}
+
+		tmpl.Execute(w, data)
+	} else {
+
+		var profilePicture string
+		err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
+		if err != nil {
+			ErrorHandler(w, r)
+			return
+		}
+
+		rows, err := db.QueryContext(context.Background(), "SELECT username, profile_picture FROM users")
+		if err != nil {
+			ErrorHandler(w, r)
+			return
+		}
+		defer rows.Close()
+
+		tmpl, err := template.ParseFiles("templates/users.html")
+		if err != nil {
+			ErrorHandler(w, r)
+			return
+		}
+
+		var Users []User
+		for rows.Next() {
+			var user User
+			if err := rows.Scan(&user.Username, &user.ProfilePicture); err != nil {
+				ErrorHandler(w, r)
+				return
+			}
+			user.LastPost = getLastPostFromUser(user.Username)
+			user.TotalLikes = getTotalLikesFromUser(user.Username)
+			Users = append(Users, user)
+		}
+
+		data := struct {
+			Users          []User
+			Username       string
+			ProfilePicture string
+		}{
+			Users,
+			username.(string),
+			profilePicture,
+		}
+
+		tmpl.Execute(w, data)
+	}
 }

@@ -17,14 +17,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 	openDB()
 	username := r.URL.Query().Get("username")
 	if username == "" {
-		http.Error(w, "User not specified", http.StatusBadRequest)
-		return
-	}
-
-	session, _ := store.Get(r, "session")
-	actualUsername, ok := session.Values["username"]
-	if !ok {
-		http.Error(w, "User not logged in", http.StatusUnauthorized)
+		ErrorHandler(w, r)
 		return
 	}
 
@@ -33,71 +26,40 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		query := `SELECT email, profile_picture, first_name, last_name, createdAt FROM users WHERE username = ?`
 		err := db.QueryRowContext(context.Background(), query, username).Scan(&email, &profilePicture, &first_name, &last_name, &createdAt)
 		if err != nil {
-			http.Error(w, "User not found", http.StatusNotFound)
+			ErrorHandler(w, r)
 			return
 		}
 
-		var data interface{}
-
-		if username != actualUsername {
-
-			data = struct {
-				Username       string
-				Email          string
-				ProfilePicture string
-				FirstName      string
-				LastName       string
-				Posts          []Post
-				Topics         []Topic
-				CreatedAt      string
-				ActualUser     bool
-			}{
-				Username:       username,
-				Email:          email,
-				ProfilePicture: profilePicture,
-				FirstName:      first_name,
-				LastName:       last_name,
-				Posts:          getPostsByUser(username),
-				Topics:         getTopicByUser(username),
-				CreatedAt:      createdAt,
-				ActualUser:     false,
-			}
-		} else {
-			data = struct {
-				Username       string
-				Email          string
-				ProfilePicture string
-				FirstName      string
-				LastName       string
-				Posts          []Post
-				Topics         []Topic
-				CreatedAt      string
-				ActualUser     bool
-			}{
-				Username:       username,
-				Email:          email,
-				ProfilePicture: profilePicture,
-				FirstName:      first_name,
-				LastName:       last_name,
-				Posts:          getPostsByUser(username),
-				Topics:         getTopicByUser(username),
-				CreatedAt:      createdAt,
-				ActualUser:     true,
-			}
+		data := struct {
+			Username       string
+			Email          string
+			ProfilePicture string
+			FirstName      string
+			LastName       string
+			Posts          []Post
+			Topics         []Topic
+			CreatedAt      string
+		}{
+			Username:       username,
+			Email:          email,
+			ProfilePicture: profilePicture,
+			FirstName:      first_name,
+			LastName:       last_name,
+			Posts:          getPostsByUser(username),
+			Topics:         getTopicByUser(username),
+			CreatedAt:      createdAt,
 		}
 
 		tmpl, err := template.ParseFiles("templates/user.html")
 		if err != nil {
-			fmt.Println(err)
-			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		tmpl.Execute(w, data)
-
 	} else if r.Method == "POST" {
 		file, handler, err := r.FormFile("profile_picture")
 		if err != nil {
-			http.Error(w, "Error during file upload", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		defer file.Close()
@@ -107,7 +69,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		filePath := filepath.Join("static/uploads", handler.Filename)
 		f, err := os.Create(filePath)
 		if err != nil {
-			http.Error(w, "Error saving the file", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		defer f.Close()
@@ -116,7 +78,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		updateSQL := `UPDATE users SET profile_picture = ? WHERE username = ?`
 		_, err = db.ExecContext(context.Background(), updateSQL, "/static/uploads/"+handler.Filename, username)
 		if err != nil {
-			http.Error(w, "Error updating the profile picture", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 
@@ -134,7 +96,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		updateSQL := `UPDATE users SET first_name = ?, last_name = ? WHERE username = ?`
 		_, err := db.ExecContext(context.Background(), updateSQL, firstName, lastName, username)
 		if err != nil {
-			http.Error(w, "Error updating the user", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 

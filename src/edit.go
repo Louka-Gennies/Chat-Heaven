@@ -13,7 +13,7 @@ func EditPost(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("postID")
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
-		http.Error(w, "Error converting the post ID", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 	session, _ := store.Get(r, "session")
@@ -21,7 +21,7 @@ func EditPost(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		tmpl, err := template.ParseFiles("templates/home.html")
 		if err != nil {
-			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		tmpl.Execute(w, nil)
@@ -31,14 +31,14 @@ func EditPost(w http.ResponseWriter, r *http.Request) {
 	var profilePicture string
 	err = db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
 	if err != nil {
-		http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 
 	var title, content, user, topic, picture string
 	err = db.QueryRowContext(context.Background(), "SELECT title, content, user, topic, picture FROM posts WHERE id = ?", postIDInt).Scan(&title, &content, &user, &topic, &picture)
 	if err != nil {
-		http.Error(w, "Post not found", http.StatusNotFound)
+		ErrorHandler(w, r)
 		return
 	}
 
@@ -48,7 +48,7 @@ func EditPost(w http.ResponseWriter, r *http.Request) {
 
 		_, err := db.ExecContext(context.Background(), "UPDATE posts SET title = ?, content = ? WHERE id = ?", newTitle, newContent, postIDInt)
 		if err != nil {
-			http.Error(w, "Error updating the post", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		http.Redirect(w, r, fmt.Sprintf("/post-content?postID=%d", postIDInt), http.StatusSeeOther)
@@ -72,7 +72,7 @@ func EditPost(w http.ResponseWriter, r *http.Request) {
 
 		tmpl, err := template.ParseFiles("templates/edit-post.html")
 		if err != nil {
-			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		tmpl.Execute(w, data)

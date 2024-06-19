@@ -16,14 +16,14 @@ func AddLike(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 	}
 	if postID == "" {
-		http.Error(w, "Message not specified", http.StatusBadRequest)
+		ErrorHandler(w, r)
 		return
 	}
 
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
-		http.Error(w, "You must be logged in to like a message", http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
@@ -31,38 +31,36 @@ func AddLike(w http.ResponseWriter, r *http.Request) {
 	var existingDislike int
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
 	if err != nil {
-		http.Error(w, "Error checking the likes", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
 	if err != nil {
-		http.Error(w, "Error checking the dislikes", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 
 	if existingLike > 0 {
-		// If a like exists, delete it
 		_, err = db.ExecContext(context.Background(), "DELETE FROM likes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Error deleting the like", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 	} else if existingDislike > 0 {
-		// If no like exists, add a new one
 		_, err = db.ExecContext(context.Background(), "INSERT INTO likes (user, title) VALUES (?, ?)", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Error adding the like", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		_, err = db.ExecContext(context.Background(), "DELETE FROM dislikes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Error adding the dislike", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 	} else {
 		_, err = db.ExecContext(context.Background(), "INSERT INTO likes (user, title) VALUES (?, ?)", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Error adding the like", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 	}
@@ -77,14 +75,14 @@ func AddDislike(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 	}
 	if postID == "" {
-		http.Error(w, "Message not specified", http.StatusBadRequest)
+		ErrorHandler(w, r)
 		return
 	}
 
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"]
 	if !ok {
-		http.Error(w, "You must be logged in to like a message", http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
@@ -92,38 +90,36 @@ func AddDislike(w http.ResponseWriter, r *http.Request) {
 	var existingLike int
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM dislikes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingDislike)
 	if err != nil {
-		http.Error(w, "Error checking the dislikes", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM likes WHERE user = ? AND title = ?", username, postIDInt).Scan(&existingLike)
 	if err != nil {
-		http.Error(w, "Error checking the likes", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 
 	if existingDislike > 0 {
-		// If a dislike exists, delete it
 		_, err = db.ExecContext(context.Background(), "DELETE FROM dislikes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Error deleting the dislike", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 	} else if existingLike > 0 {
-		// If no dislike exists, add a new one
 		_, err = db.ExecContext(context.Background(), "INSERT INTO dislikes (user, title) VALUES (?, ?)", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Error adding the dislike", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		_, err = db.ExecContext(context.Background(), "DELETE FROM likes WHERE user = ? AND title = ?", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Error adding the like", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 	} else {
 		_, err = db.ExecContext(context.Background(), "INSERT INTO dislikes (user, title) VALUES (?, ?)", username, postIDInt)
 		if err != nil {
-			http.Error(w, "Error adding the dislike", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 	}

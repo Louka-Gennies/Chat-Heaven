@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Users</title>
+    <title>Title</title>
     <link rel="stylesheet" href="../static/css/header.css">
-    <link rel="stylesheet" href="../static/css/users.css">
+    <link rel="stylesheet" href="../static/css/error.css">
     <link rel="stylesheet" href="../static/css/footer.css">
     <link rel="stylesheet" href="../static/css/breadcrumb.css">
 </head>
@@ -29,42 +29,16 @@
     {{end}}
 </header>
 <body>
-    <main>
-        <div class="breadcrumb">
-            <a href="/">Main page</a> > <span>Users</span>
-        </div>
-        <table class="users">
-            <tr>
-                <th class ="tab-user">Username</th>
-                <th class ="tab-profile-picture">Profile Picture</th>
-                <th class ="last-post">Last Post</th>
-                <th class ="likes">Total Likes</th>
-            </tr>
-            {{range .Users}}
-            <tr>
-                <td class ="username-tab"><a href="/user?username={{.Username}}">{{.Username}}</a></td>
-                <td class ="img-users"><a href="/user?username={{.Username}}"><img src="{{.ProfilePicture}}" alt="Photo de profil"></a></td>
-                <td class = "last-post-tab">
-                    {{ if .LastPost}}
-                    <p>{{.LastPost.Title}} by
-                        <a href="/user?username={{.LastPost.Author}}">{{.LastPost.Author}}</a>
-                        <a href ="/post-content?postID={{.LastPost.ID}}">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
-                                <title>Go to last post</title>
-                                <path d="m640-280-57-56 184-184-184-184 57-56 240 240-240 240ZM80-200v-160q0-83 58.5-141.5T280-560h247L383-704l57-56 240 240-240 240-57-56 144-144H280q-50 0-85 35t-35 85v160H80Z"/>
-                            </svg>
-                        </a>
-                    </p>
-                    <span class = "last-post-date">{{.LastPost.Date}}</span>
-                    {{ else}}
-                    <p>No posts yet</p>
-                    {{end}}
-                </td>
-                <td class = "total-likes">{{.TotalLikes}}</td>
-            </tr>
-            {{end}}
-        </table>
-    </main>
+<main>
+    <div class="breadcrumb">
+        <a href="/">Main page</a> > <span>Error</span>
+    </div>
+    <div class="error-message">
+        <h1>Oops! Something went wrong.</h1>
+        <p>We're sorry, but we can't process your request right now. Please try again later.</p>
+    </div>
+</main>
+
 </body>
 <div class="footer">
     <p>Chat Heaven©</p>

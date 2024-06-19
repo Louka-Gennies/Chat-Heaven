@@ -74,7 +74,7 @@ main {
 }
 
 .create-topic {
-    height: 15px;
+    height: 20px;
     background-color: #33CCFF;
     padding: 10px 10px;
     border-radius: 5px;
@@ -82,11 +82,13 @@ main {
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
+    font-weight: bold;
+    color : white;
     transition: background-color 0.3s;
 }
 
 .create-topic:hover {
-    background-color: #0056b3;
+    background-color: #28bdf1;
 }
 
 

@@ -12,7 +12,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	openDB()
 	session, err := store.Get(r, "session")
 	if err != nil {
-		http.Error(w, "Error retrieving session", http.StatusInternalServerError)
+		ErrorHandler(w, r)
 		return
 	}
 
@@ -33,13 +33,13 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 			NbPosts:        countPosts(),
 			NbTopics:       countTopics(),
 			NbUsers:        countUsers(),
-			Last4Topics:    getTopics(3),
+			Last4Topics:    getTopics(4),
 			IsLogged:       false,
 		}
 
 		tmpl, err := template.ParseFiles("templates/home.html")
 		if err != nil {
-			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		tmpl.Execute(w, data)
@@ -48,7 +48,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		var profilePicture string
 		err := db.QueryRowContext(context.Background(), "SELECT profile_picture FROM users WHERE username = ?", username).Scan(&profilePicture)
 		if err != nil {
-			http.Error(w, "Error retrieving the profile picture", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 
@@ -72,7 +72,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 		tmpl, err := template.ParseFiles("templates/home.html")
 		if err != nil {
-			http.Error(w, "Error reading the HTML file", http.StatusInternalServerError)
+			ErrorHandler(w, r)
 			return
 		}
 		tmpl.Execute(w, data)

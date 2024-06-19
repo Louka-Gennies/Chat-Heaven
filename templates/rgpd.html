@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RGPD</title>
+    <link rel="stylesheet" href="../static/css/header.css">
+    <link rel="stylesheet" href="../static/css/footer.css">
+    <link rel="stylesheet" href="../static/css/rgpd.css">
+    <link rel="stylesheet" href="../static/css/breadcrumb.css">
+</head>
+<header>
+  <div class="logo">
+    <a href="/">
+    </a>
+  </div>
+  <div class="search">
+    <input type="text" id="search-input" placeholder="Search...">
+    <svg width="30" height="30" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21.6787 0.0619393C9.72446 0.0619393 0 9.7864 0 21.7407C0 33.695 9.72446 43.4194 21.6787 43.4194C25.3332 43.4194 28.9256 42.5523 31.9607 40.8799C32.2038 41.1725 32.4733 41.442 32.7659 41.6851L38.9598 47.879C39.5317 48.5226 40.2291 49.0425 41.0093 49.4067C41.7894 49.771 42.6357 49.9719 43.4963 49.9973C44.3569 50.0226 45.2136 49.8718 46.0138 49.554C46.814 49.2363 47.5408 48.7584 48.1496 48.1496C48.7584 47.5408 49.2363 46.814 49.554 46.0138C49.8718 45.2136 50.0226 44.3569 49.9973 43.4963C49.9719 42.6357 49.771 41.7894 49.4067 41.0093C49.0425 40.2292 48.5226 39.5317 47.879 38.9598L41.6851 32.7659C41.3834 32.464 41.0513 32.1942 40.6941 31.9607C42.3664 28.9256 43.4194 25.3951 43.4194 21.6787C43.4194 9.72446 33.695 0 21.7407 0L21.6787 0.0619393ZM21.6787 6.25586C30.2883 6.25586 37.1636 13.1311 37.1636 21.7407C37.1636 25.8287 35.677 29.607 33.0756 32.3942C33.0136 32.4562 32.9517 32.5181 32.8897 32.58C32.5972 32.8232 32.3276 33.0927 32.0845 33.3853C29.3592 35.8628 25.6428 37.2874 21.6168 37.2874C13.0072 37.2874 6.13199 30.4122 6.13199 21.8026C6.13199 13.1931 13.0072 6.3178 21.6168 6.3178L21.6787 6.25586Z" fill="#515151"/>
+    </svg>
+  </div>
+  {{if .Username}}
+  <div class="pfp">
+    <a href="/user?username={{.Username}}" class="username">{{.Username}}</a>
+    <a href="/user?username={{.Username}}" class="profile"><img src="{{.ProfilePicture}}" alt="Photo de profil" href="/user?username={{.Username}}" ></a>
+  </div>
+  {{else}}
+  <div class="login"><a href="/login">Login</a></div>
+  {{end}}
+</header>
+<body>
+  <main>
+    <div class="breadcrumb">
+      <a href="/">Main page</a> > <a href="/register">Register</a> > <span>Privacy Policy</span>
+    </div>
+    <div class ="rgpd-container">
+      <div class ="rgpd-container-2">
+        <div class="rgpd-title">
+          <h1>Privacy Policy and Data Protection</h1>
+        </div>
+        <div class ="rgpd-content">
+          Chat Heaven (hereinafter "the Forum") values the protection of your personal data and your privacy. This privacy policy explains how we collect, use, store, and protect your personal data in accordance with the General Data Protection Regulation (GDPR).
+
+          1. Data Controller
+          The data controller is:
+          Chat Heaven
+          Email: chatheaven@gmail.com
+
+          2. Data Collected
+          We collect different categories of personal data when you use our Forum, including:
+
+          Account Information: username, email address, password.
+          Profile Data: avatar, biography, interests.
+          User-Generated Content: messages, comments, posts.
+          Connection Data: IP address, browser type, connection times.
+          3. Purposes of Processing
+          We use your personal data for the following purposes:
+
+          Account Management: creating and managing your account on the Forum.
+          Interaction with Other Members: posting messages, comments, participating in discussions.
+          Forum Improvement: analyzing usage behaviors to improve user experience.
+          Security and Fraud Prevention: protecting against malicious activities and security breaches.
+          4. Legal Basis for Processing
+          We process your personal data on the following legal bases:
+
+          Consent: you have given your consent to the processing of your data by registering on the Forum.
+          Contract: processing is necessary for the performance of the contract between you and the Forum.
+          Legitimate Interest: to ensure the security and continuous improvement of the Forum.
+          5. Data Sharing
+          We do not share your personal data with third parties without your consent, except in the following cases:
+
+          Service Providers: we use service providers for hosting, maintenance, and data analysis.
+          Legal Obligations: we may disclose your data to comply with a legal obligation or to respond to lawful requests from competent authorities.
+          6. Data Retention
+          We retain your personal data for as long as necessary for the purposes described in this privacy policy or to comply with legal obligations.
+
+          7. Your Rights
+          In accordance with the GDPR, you have the following rights:
+
+          Right of Access: you can request access to your personal data that we hold.
+          Right to Rectification: you can request the correction of inaccurate or incomplete data.
+          Right to Erasure: you can request the deletion of your personal data.
+          Right to Restriction of Processing: you can request the restriction of the processing of your personal data.
+          Right to Data Portability: you can request to receive your data in a structured, commonly used format.
+          Right to Object: you can object to the processing of your personal data.
+          To exercise these rights, please contact us at [contact email].
+
+          8. Data Security
+          We implement appropriate technical and organizational measures to protect your personal data against any destruction, loss, alteration, disclosure, or unauthorized access.
+
+          9. Changes to the Privacy Policy
+          We may update this privacy policy from time to time. We will inform you of any changes by posting the new version on the Forum and sending you a notification via email.
+
+          10. Contact
+          If you have any questions about this privacy policy or your personal data, you can contact us at chatheaven@gmail.com.
+
+          This privacy policy is effective as of 19/06/2024.
+        </div>
+      </div>
+    </div>
+  </main>
+
+</body>
+<div class="footer">
+  <p>Chat Heaven©</p>
+</div>
+<script src="../static/js/search-autocomplete.js"></script>
+</html>
