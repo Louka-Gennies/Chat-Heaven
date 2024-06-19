@@ -162,3 +162,7 @@ header a {
 .ui-helper-hidden-accessible {
     display: none !important;
 }
+
+.autocomplete-results{
+    position: fixed;
+}

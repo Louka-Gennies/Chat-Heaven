@@ -50,7 +50,7 @@ func TopicsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error reading the messages", http.StatusInternalServerError)
 			return
 		}
-		topic.NbPosts = len(getPosts(topic.Title))
+		topic.NbPosts = len(getPosts(topic.Title, ""))
 		topic.LastPost = getLastPost(topic.Title)
 		Topics = append(Topics, topic)
 	}
