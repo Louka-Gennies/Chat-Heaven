@@ -125,6 +125,6 @@ func main() {
 	http.HandleFunc("/delete-comment", chatHeaven.DeleteComment)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	log.Println("Server started at :8080")
+	log.Println("Server started at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
