@@ -10,7 +10,6 @@ $(function() {
                 success: function (data) {
                     response($.map(data, function (item) {
                         return {
-                            label: item.value,
                             value: item.value,
                             type: item.type,
                             profil_picture: item.profil_picture
@@ -35,7 +34,7 @@ $(function() {
         var imgSrc = item.type === "topic" ? "/static/img/topic-logo.png" : item.profil_picture ;
         var colorClass = getColorClass(divCount);
         return $("<li>")
-            .append("<div class='rounded-image-div " + colorClass + "'><img class='rounded-image' src='" + imgSrc + "' width='50px' height='50px' /> " + item.label + "</div>")
+            .append("<div class='rounded-image-div " + colorClass + "'><img class='rounded-image' src='" + imgSrc + "' width='50px' height='50px' /> " + item.value + "</div>")
             .appendTo(ul);
     };
 });
